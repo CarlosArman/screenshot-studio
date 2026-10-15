@@ -69,7 +69,8 @@ The solution combines:
 - PNG, JPEG, and WebP export with clipboard copy support.
 - Checkerboard preview for transparent compositions.
 
-🔗 **Web app:** [`web/index.html`](./web/index.html)  
+🌐 **Live web app:** [carlosarman.github.io/screenshot-studio](https://carlosarman.github.io/screenshot-studio/)<br>
+🔗 **Web app source:** [`web/`](./web/)<br>
 🔗 **Browser extension:** [`browser-extension/`](./browser-extension)  
 🔗 **VS Code extension:** [`vscode-extension/`](./vscode-extension)  
 🔗 **Spanish README:** [`README.es.md`](./README.es.md)  
@@ -147,6 +148,12 @@ The solution combines:
 npx serve web
 ```
 
+### GitHub Pages deployment
+
+The live web app is published at [https://carlosarman.github.io/screenshot-studio/](https://carlosarman.github.io/screenshot-studio/).
+
+Pushes to `main` automatically deploy the contents of [`web/`](./web/) through [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml). The workflow is required because GitHub Pages only supports branch-based publishing from the repository root or `/docs`; it cannot directly use `web/` as its source directory.
+
 ---
 
 ## ⌨️ Keyboard Shortcuts
@@ -222,6 +229,9 @@ Screenshot Studio includes:
 
 ```text
 screenshot-studio/
+├── .github/
+│   └── workflows/
+│       └── deploy-pages.yml
 ├── web/
 │   ├── index.html
 │   ├── favicon.svg

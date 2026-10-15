@@ -69,7 +69,8 @@ La solución combina:
 - Exportación PNG, JPEG y WebP con soporte de copia al portapapeles.
 - Vista checkerboard para composiciones transparentes.
 
-🔗 **Aplicación web:** [`web/index.html`](./web/index.html)  
+🌐 **Aplicación web en línea:** [carlosarman.github.io/screenshot-studio](https://carlosarman.github.io/screenshot-studio/)<br>
+🔗 **Código de la aplicación web:** [`web/`](./web/)<br>
 🔗 **Extensión navegador:** [`browser-extension/`](./browser-extension)  
 🔗 **Extensión VS Code:** [`vscode-extension/`](./vscode-extension)  
 🔗 **README en inglés:** [`README.md`](./README.md)  
@@ -147,6 +148,12 @@ La solución combina:
 npx serve web
 ```
 
+### Despliegue en GitHub Pages
+
+La aplicación web está publicada en [https://carlosarman.github.io/screenshot-studio/](https://carlosarman.github.io/screenshot-studio/).
+
+Cada push a `main` despliega automáticamente el contenido de [`web/`](./web/) mediante [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml). El workflow es necesario porque GitHub Pages solo permite publicaciones desde la raíz del repositorio o desde `/docs`; no puede usar directamente `web/` como directorio de origen.
+
 ---
 
 ## ⌨️ Atajos de teclado
@@ -222,6 +229,9 @@ Screenshot Studio incorpora:
 
 ```text
 screenshot-studio/
+├── .github/
+│   └── workflows/
+│       └── deploy-pages.yml
 ├── web/
 │   ├── index.html
 │   ├── favicon.svg

@@ -12,6 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Public GitHub Pages site at [carlosarman.github.io/screenshot-studio](https://carlosarman.github.io/screenshot-studio/).
+- GitHub Actions workflow that deploys the contents of `web/` to GitHub Pages when changes are pushed to `main`.
 - Visual image-editor-style crop controls with a draggable frame, corner and edge handles, outside mask, Apply/Cancel actions, and original-image restoration during the current session.
 - Bundled and synchronized Screenshot Studio editor for the browser and VS Code extensions, providing frames, backgrounds, visual crop, annotations, history, and local export.
 - Browser extension capture modes for the visible area, a user-selected page area, and the entire scrollable page.

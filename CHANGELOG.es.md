@@ -12,6 +12,8 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) y
 
 ### Añadido
 
+- Sitio público en GitHub Pages: [carlosarman.github.io/screenshot-studio](https://carlosarman.github.io/screenshot-studio/).
+- Workflow de GitHub Actions que despliega el contenido de `web/` en GitHub Pages al subir cambios a `main`.
 - Recorte visual estilo editor de imágenes, con marco arrastrable, controladores de esquinas y bordes, máscara exterior, aplicar/cancelar y restauración de la imagen original durante la sesión.
 - Editor de Screenshot Studio integrado y sincronizado para las extensiones de navegador y VS Code, con marcos, fondos, recorte visual, anotaciones, historial y exportación local.
 - Modos de captura de extensión para el área visible, una parte seleccionada de la página y toda la página desplazable.
