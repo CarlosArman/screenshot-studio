@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Screenshot Studio — Editor local de capturas</title>
+<meta name="description" content="Editor local para capturar, anotar y exportar imágenes sin subirlas a ningún servidor." />
+<meta name="theme-color" content="#090b12" />
+<link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+<link rel="stylesheet" href="./styles/main.css" />
+<link rel="stylesheet" href="./styles/light-theme.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="38" height="38" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="brand-grad" x1="0" y1="0" x2="240" y2="240" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#7766FF"/>
+              <stop offset="1" stop-color="#22D3EE"/>
+            </linearGradient>
+            <radialGradient id="brand-vig" cx="50%" cy="100%" r="80%">
+              <stop offset="0" stop-color="#000" stop-opacity=".22"/>
+              <stop offset="1" stop-color="#000" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect x="8" y="8" width="224" height="224" rx="50" fill="url(#brand-grad)"/>
+          <rect x="8" y="8" width="224" height="224" rx="50" fill="url(#brand-vig)"/>
+          <g fill="none" stroke="#F4F6FC" stroke-linecap="round" stroke-linejoin="round" stroke-width="20">
+            <path d="M88 48H62a18 18 0 0 0-18 18v26"/>
+            <path d="M152 48h26a18 18 0 0 1 18 18v26"/>
+            <path d="M44 156v26a18 18 0 0 0 18 18h26"/>
+            <path d="M196 156v26a18 18 0 0 1-18 18h-26"/>
+          </g>
+          <path d="M120 66c4 24 16 36 38 38-22 4-34 16-38 38-4-22-16-34-38-38 22-4 34-16 38-38Z" fill="#F4F6FC"/>
+          <path d="M120 78c3 16 11 24 26 26-15 3-23 11-26 26-3-15-11-23-26-26 15-3 23-11 26-26Z" fill="#090B12"/>
+          <circle cx="120" cy="104" r="7" fill="#22D3EE"/>
+          <rect x="4" y="4" width="232" height="232" rx="54" fill="none" stroke="#22D3EE" stroke-width="2.5" opacity=".55"/>
+        </svg>
+        <span class="brand-name">Screenshot <span class="brand-name-studio">Studio</span></span>
+        <span class="beta-badge">BETA</span>
+      </div>
+
+      <div class="topbar-tools" id="toolSelector" role="toolbar" aria-label="Herramientas de anotación">
+        <button class="tool-btn active" data-tool="select" type="button" title="Seleccionar (V)" aria-label="Seleccionar" aria-pressed="true">⬚</button>
+        <button class="tool-btn" data-tool="text" type="button" title="Texto (T)" aria-label="Agregar texto" aria-pressed="false">T</button>
+        <button class="tool-btn" data-tool="number" type="button" title="Número (N)" aria-label="Agregar número" aria-pressed="false">①</button>
+        <button class="tool-btn" data-tool="arrow" type="button" title="Flecha (A)" aria-label="Dibujar flecha" aria-pressed="false">↗</button>
+        <button class="tool-btn" data-tool="rect" type="button" title="Rectángulo (R)" aria-label="Dibujar rectángulo" aria-pressed="false">▭</button>
+        <button class="tool-btn" data-tool="ellipse" type="button" title="Círculo (O)" aria-label="Dibujar círculo" aria-pressed="false">◯</button>
+        <button class="tool-btn" data-tool="pen" type="button" title="Pincel (P)" aria-label="Dibujar con pincel" aria-pressed="false">✎</button>
+        <button class="tool-btn" data-tool="highlighter" type="button" title="Resaltador (H)" aria-label="Resaltar" aria-pressed="false">▰</button>
+        <button class="tool-btn" data-tool="blur" type="button" title="Ocultar información (B)" aria-label="Ocultar información sensible" aria-pressed="false">▓</button>
+      </div>
+
+      <div class="topbar-actions">
+        <label class="theme-selector" for="appTheme">
+          <span class="sr-only">Tema de la aplicación</span>
+          <select id="appTheme" aria-label="Tema de la aplicación">
+            <option value="system">Sistema</option>
+            <option value="light">Claro</option>
+            <option value="dark">Oscuro</option>
+          </select>
+        </label>
+        <button id="undoBtn" class="icon-btn" type="button" title="Deshacer (Ctrl+Z)" aria-label="Deshacer">↺</button>
+        <button id="redoBtn" class="icon-btn" type="button" title="Rehacer (Ctrl+Y)" aria-label="Rehacer">↻</button>
+        <button id="deleteBtn" class="icon-btn" type="button" title="Eliminar (Supr)" aria-label="Eliminar anotación seleccionada">🗑</button>
+        <button id="exportBtn" class="primary-btn" type="button">Exportar</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="panel panel-left" id="panelLeft" aria-label="Opciones de composición">
+        <section class="panel-section" aria-labelledby="imageSectionHeading">
+          <h3 id="imageSectionHeading">Imagen</h3>
+          <button id="captureScreenBtn" class="capture-screen-btn" type="button">⛶ <span>Capturar pantalla o ventana</span></button>
+        </section>
+
+        <section class="panel-section" aria-labelledby="cropSectionHeading">
+          <h3 id="cropSectionHeading">Recortar imagen</h3>
+          <p class="panel-help">Selecciona Recortar y ajusta el marco directamente sobre la imagen, como en los editores de imágenes.</p>
+          <button id="startCropBtn" class="secondary-btn" type="button">Recortar imagen</button>
+          <div id="cropActions" class="button-row crop-actions" hidden>
+            <button id="applyCropBtn" class="secondary-btn" type="button">Aplicar</button>
+            <button id="cancelCropBtn" class="secondary-btn" type="button">Cancelar</button>
+          </div>
+          <button id="resetCropBtn" class="crop-reset-btn" type="button">Restablecer imagen original</button>
+        </section>
+
+        <section class="panel-section" aria-labelledby="frameSectionHeading">
+          <h3 id="frameSectionHeading">Marco</h3>
+          <fieldset class="chip-group" id="frameSelector">
+            <legend class="sr-only">Seleccionar estilo de marco</legend>
+            <button class="chip" data-frame="none" type="button">Ninguno</button>
+            <button class="chip active" data-frame="macos" type="button">macOS</button>
+            <button class="chip" data-frame="windows" type="button">Windows</button>
+            <button class="chip" data-frame="linux" type="button">Linux</button>
+            <button class="chip" data-frame="browser" type="button">Navegador</button>
+            <button class="chip" data-frame="safari" type="button">Safari</button>
+            <button class="chip" data-frame="chrome" type="button">Chrome</button>
+            <button class="chip" data-frame="terminal" type="button">Terminal</button>
+          </fieldset>
+          <label class="field-row" for="frameTheme">
+            <span>Tema</span>
+            <select id="frameTheme" aria-label="Tema del marco">
+              <option value="light">Claro</option>
+              <option value="dark">Oscuro</option>
+            </select>
+          </label>
+          <label class="field-row" for="frameTitle">
+            <span>Título / URL</span>
+            <input type="text" id="frameTitle" placeholder="miapp.com" aria-label="Título o URL del marco" />
+          </label>
+        </section>
+
+        <section class="panel-section" aria-labelledby="backgroundSectionHeading">
+          <h3 id="backgroundSectionHeading">Fondo</h3>
+          <div class="chip-group" id="backgroundSelector">
+            <button class="chip" data-bg="solid" type="button">Sólido</button>
+            <button class="chip active" data-bg="gradient" type="button">Degradado</button>
+            <button class="chip" data-bg="transparent" type="button">Transparente</button>
+          </div>
+          <div class="color-row">
+            <label for="bgColor1">Color inicial<input type="color" id="bgColor1" value="#6366f1" /></label>
+            <label for="bgColor2">Color final<input type="color" id="bgColor2" value="#06b6d4" /></label>
+          </div>
+          <p class="preset-label">Fondos rápidos</p>
+          <fieldset class="background-presets" id="backgroundPresets">
+            <legend class="sr-only">Fondos preconfigurados</legend>
+            <button class="background-preset aurora" type="button" data-preset="aurora" aria-label="Fondo Aurora"></button>
+            <button class="background-preset sunset" type="button" data-preset="sunset" aria-label="Fondo Sunset"></button>
+            <button class="background-preset ocean" type="button" data-preset="ocean" aria-label="Fondo Ocean"></button>
+            <button class="background-preset berry" type="button" data-preset="berry" aria-label="Fondo Berry"></button>
+            <button class="background-preset midnight" type="button" data-preset="midnight" aria-label="Fondo Midnight"></button>
+            <button class="background-preset lime" type="button" data-preset="lime" aria-label="Fondo Lime"></button>
+          </fieldset>
+        </section>
+
+        <section class="panel-section" aria-labelledby="compositionSectionHeading">
+          <h3 id="compositionSectionHeading">Composición</h3>
+          <label class="field-row" for="paddingRange"><span>Padding</span><input type="range" id="paddingRange" min="0" max="200" value="64" aria-describedby="paddingValue" /><output id="paddingValue" class="range-value">64 px</output></label>
+          <label class="field-row" for="radiusRange"><span>Radio</span><input type="range" id="radiusRange" min="0" max="60" value="12" aria-describedby="radiusValue" /><output id="radiusValue" class="range-value">12 px</output></label>
+          <label class="field-row" for="shadowRange"><span>Sombra</span><input type="range" id="shadowRange" min="0" max="100" value="40" aria-describedby="shadowValue" /><output id="shadowValue" class="range-value">40%</output></label>
+          <label class="field-row" for="scaleRange"><span>Escala</span><input type="range" id="scaleRange" min="50" max="150" value="100" aria-describedby="scaleValue" /><output id="scaleValue" class="range-value">100%</output></label>
+        </section>
+      </aside>
+
+      <!-- Botón de toggle fuera del panel para evitar conflictos de overflow -->
+      <button class="panel-toggle panel-toggle-left" id="toggleLeft" type="button" aria-label="Contraer panel izquierdo" aria-expanded="true" aria-controls="panelLeft">‹</button>
+
+      <section class="canvas-area" id="canvasArea" aria-label="Área de edición">
+        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" aria-label="Seleccionar una imagen para editar" hidden />
+        <div class="empty-glow" aria-hidden="true"></div>
+        <label class="canvas-import" id="canvasImport" for="fileInput">
+          <span class="canvas-import-icon" aria-hidden="true">↥</span>
+          <strong>Agrega una captura para comenzar</strong>
+          <span>Arrastra una imagen aquí, pégala desde el portapapeles o selecciona un archivo.</span>
+          <span class="canvas-import-action">Seleccionar imagen</span>
+          <span class="sr-only">Formatos permitidos: PNG, JPEG o WebP.</span>
+        </label>
+        <output id="toolHint" class="tool-hint" aria-live="polite">Seleccionar: haz clic en una anotación existente para editarla o arrástrala para moverla.</output>
+        <div class="canvas-stage" id="canvasStage">
+          <canvas id="mainCanvas" tabindex="0" aria-label="Lienzo de edición de captura" aria-describedby="canvasInstructions"></canvas>
+          <p id="canvasInstructions" class="sr-only">Usa las herramientas para crear anotaciones con puntero. Para editar una anotación con teclado, selecciónala desde la lista de capas y ajusta sus propiedades y posición en el panel Propiedades.</p>
+          <div id="overlayLayer" class="overlay-layer"></div>
+        </div>
+        <div class="zoom-controls" aria-label="Controles de zoom">
+          <button id="zoomOutBtn" class="zoom-btn" type="button" aria-label="Disminuir zoom">−</button>
+          <output id="zoomValue" for="zoomOutBtn zoomInBtn">100%</output>
+          <button id="zoomInBtn" class="zoom-btn" type="button" aria-label="Aumentar zoom">+</button>
+          <button id="zoomResetBtn" class="zoom-reset" type="button" aria-label="Restablecer zoom">Ajustar</button>
+        </div>
+      </section>
+
+      <!-- Botón de toggle fuera del panel para evitar conflictos de overflow -->
+      <button class="panel-toggle panel-toggle-right" id="toggleRight" type="button" aria-label="Contraer panel derecho" aria-expanded="true" aria-controls="panelRight">›</button>
+
+      <aside class="panel panel-right" id="panelRight" aria-label="Propiedades y exportación">
+        <section class="panel-section" aria-labelledby="accessibleAnnotationsHeading">
+          <h3 id="accessibleAnnotationsHeading">Anotaciones accesibles</h3>
+          <p class="panel-help">Crea una anotación sin usar el lienzo y edítala desde Propiedades.</p>
+          <fieldset class="annotation-actions">
+            <legend class="sr-only">Crear anotación</legend>
+            <button class="secondary-btn" type="button" data-add-annotation="text">Agregar texto</button>
+            <button class="secondary-btn" type="button" data-add-annotation="number">Agregar número</button>
+            <button class="secondary-btn" type="button" data-add-annotation="rect">Agregar rectángulo</button>
+            <button class="secondary-btn" type="button" data-add-annotation="arrow">Agregar flecha</button>
+            <button class="secondary-btn" type="button" data-add-annotation="blur">Agregar privacidad</button>
+          </fieldset>
+        </section>
+        <section class="panel-section" aria-labelledby="propertiesSectionHeading">
+          <h3 id="propertiesSectionHeading">Propiedades</h3>
+          <div id="propertiesPanel" class="properties-empty" aria-live="polite">Selecciona un elemento para editar sus propiedades.</div>
+        </section>
+        <section class="panel-section" aria-labelledby="layersSectionHeading">
+          <h3 id="layersSectionHeading">Capas</h3>
+          <ul id="layersList" class="layers-list"></ul>
+        </section>
+        <section class="panel-section export-card" aria-labelledby="exportSectionHeading">
+          <h3 id="exportSectionHeading">Exportar</h3>
+          <label class="field-row" for="exportFormat"><span>Formato</span><select id="exportFormat" aria-label="Formato de exportación"><option value="png">PNG</option><option value="jpeg">JPEG</option><option value="webp">WebP</option></select></label>
+          <label class="field-row" for="exportQuality"><span>Calidad</span><input type="range" id="exportQuality" min="10" max="100" value="92" aria-describedby="exportQualityValue" /><output id="exportQualityValue" class="range-value">92%</output></label>
+          <div class="button-row">
+            <button id="downloadBtn" class="secondary-btn" type="button">Descargar</button>
+            <button id="copyBtn" class="secondary-btn" type="button">Copiar</button>
+          </div>
+        </section>
+      </aside>
+    </main>
+    <output id="appStatus" class="sr-only" aria-live="polite" aria-atomic="true"></output>
+  </div>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

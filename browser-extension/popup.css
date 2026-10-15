@@ -1,0 +1,134 @@
+:root {
+  color-scheme: dark;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-width: 300px;
+  background: #151820;
+  color: #e8ebf1;
+}
+
+main {
+  padding: 16px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.logo {
+  width: 11px;
+  height: 11px;
+  display: inline-block;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46c8, #087c92);
+}
+
+p {
+  color: #d1d8e6;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.capture-actions {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.capture-btn {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #3a4255;
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: #e8ebf1;
+  font-weight: 700;
+  cursor: pointer;
+  background: #232938;
+}
+
+.capture-btn:hover:not(:disabled) {
+  border-color: #6d7cf1;
+  background: #2a3143;
+}
+
+.capture-btn.primary {
+  border: 0;
+  color: #fff;
+  background: linear-gradient(135deg, #4f46c8, #087c92);
+}
+
+.open-app-btn {
+  width: 100%;
+  min-height: 38px;
+  margin-top: 10px;
+  border: 1px solid #6070d9;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #dfe5ff;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+}
+
+.open-app-btn:hover:not(:disabled) {
+  border-color: #8a98ff;
+  background: #242a40;
+}
+
+.open-app-btn:focus-visible {
+  outline: 3px solid #8be9ff;
+  outline-offset: 3px;
+}
+
+.open-app-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.capture-btn:focus-visible {
+  outline: 3px solid #8be9ff;
+  outline-offset: 3px;
+}
+
+.capture-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+small {
+  display: block;
+  margin-top: 12px;
+  color: #b9c2d4;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+#captureStatus {
+  display: block;
+  min-height: 18px;
+  margin-top: 10px;
+  color: #e5e9ff;
+  font-size: 12px;
+}

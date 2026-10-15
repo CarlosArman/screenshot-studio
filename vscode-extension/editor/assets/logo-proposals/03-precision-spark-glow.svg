@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title description">
+  <title id="title">Screenshot Studio — Precision Spark (glow)</title>
+  <desc id="description">Isotipo con efecto de resplandor para uso en slides, banners y redes sociales.</desc>
+  <defs>
+    <linearGradient id="ps-glow-grad" x1="0" y1="0" x2="240" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7766FF"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <radialGradient id="ps-glow-vig" cx="50%" cy="100%" r="80%">
+      <stop offset="0" stop-color="#000" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="ps-glow-filter" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <g filter="url(#ps-glow-filter)">
+    <rect x="8" y="8" width="224" height="224" rx="50" fill="url(#ps-glow-grad)"/>
+    <rect x="8" y="8" width="224" height="224" rx="50" fill="url(#ps-glow-vig)"/>
+  </g>
+
+  <g fill="none" stroke="#F4F6FC" stroke-linecap="round" stroke-linejoin="round" stroke-width="20">
+    <path d="M88 48H62a18 18 0 0 0-18 18v26"/>
+    <path d="M152 48h26a18 18 0 0 1 18 18v26"/>
+    <path d="M44 156v26a18 18 0 0 0 18 18h26"/>
+    <path d="M196 156v26a18 18 0 0 1-18 18h-26"/>
+  </g>
+  <path d="M120 66c4 24 16 36 38 38-22 4-34 16-38 38-4-22-16-34-38-38 22-4 34-16 38-38Z" fill="#F4F6FC"/>
+  <path d="M120 78c3 16 11 24 26 26-15 3-23 11-26 26-3-15-11-23-26-26 15-3 23-11 26-26Z" fill="#090B12"/>
+  <circle cx="120" cy="104" r="7" fill="#22D3EE"/>
+
+  <rect x="4" y="4" width="232" height="232" rx="54" fill="none" stroke="#22D3EE" stroke-width="2.5" opacity=".7"/>
+</svg>

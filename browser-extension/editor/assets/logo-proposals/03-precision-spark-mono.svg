@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title description">
+  <title id="title">Screenshot Studio — Precision Spark (monocromo blanco)</title>
+  <desc id="description">Isotipo monocromo para uso sobre fondos oscuros, bordado, serigrafía y documentos PDF.</desc>
+
+  <rect x="8" y="8" width="224" height="224" rx="50" fill="#F4F6FC"/>
+
+  <g fill="none" stroke="#090B12" stroke-linecap="round" stroke-linejoin="round" stroke-width="20">
+    <path d="M88 48H62a18 18 0 0 0-18 18v26"/>
+    <path d="M152 48h26a18 18 0 0 1 18 18v26"/>
+    <path d="M44 156v26a18 18 0 0 0 18 18h26"/>
+    <path d="M196 156v26a18 18 0 0 1-18 18h-26"/>
+  </g>
+  <path d="M120 66c4 24 16 36 38 38-22 4-34 16-38 38-4-22-16-34-38-38 22-4 34-16 38-38Z" fill="#090B12"/>
+  <path d="M120 78c3 16 11 24 26 26-15 3-23 11-26 26-3-15-11-23-26-26 15-3 23-11 26-26Z" fill="#F4F6FC"/>
+  <circle cx="120" cy="104" r="7" fill="#090B12"/>
+</svg>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Screenshot Studio</title>
+  <link rel="stylesheet" href="./popup.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <span class="logo"></span>
+      <strong>Screenshot Studio</strong>
+    </header>
+    <p>Elige qué parte de la pestaña actual quieres capturar. La imagen se abrirá directamente en el editor local.</p>
+    <fieldset class="capture-actions">
+      <legend class="sr-only">Modo de captura</legend>
+      <button class="capture-btn primary" data-capture="capture-visible-tab" type="button">Capturar área visible</button>
+      <button class="capture-btn" data-capture="capture-selection" type="button">Capturar una parte de la página</button>
+      <button class="capture-btn" data-capture="capture-full-page" type="button">Capturar toda la página</button>
+    </fieldset>
+    <button id="openAppBtn" class="open-app-btn" type="button">Abrir Screenshot Studio</button>
+    <small>
+      La captura se procesa localmente; no se sube a ningún servidor. La página completa está limitada a 24 megapíxeles.
+    </small>
+    <output id="captureStatus" aria-live="polite" aria-atomic="true"></output>
+  </main>
+  <script type="module" src="./popup.js"></script>
+</body>
+</html>

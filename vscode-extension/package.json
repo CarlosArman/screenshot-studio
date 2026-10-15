@@ -1,0 +1,31 @@
+{
+  "name": "screenshot-studio",
+  "displayName": "Screenshot Studio",
+  "description": "Abre imágenes locales en el editor completo Screenshot Studio, con marcos, recorte, anotaciones y exportación.",
+  "version": "0.1.0",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "icon": "icon.png",
+  "categories": [
+    "Other"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "screenshotStudio.openImage",
+        "title": "Screenshot Studio: Abrir imagen en el editor"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "screenshotStudio.openImage",
+          "when": "resourceExtname == .png || resourceExtname == .jpg || resourceExtname == .jpeg || resourceExtname == .webp"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 140" role="img" aria-labelledby="title description">
+  <title id="title">Screenshot Studio — Precision Spark (wordmark oscuro)</title>
+  <desc id="description">Imagotipo horizontal con wordmark blanco para uso sobre fondos oscuros.</desc>
+  <defs>
+    <linearGradient id="ps-dark-grad" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7766FF"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <radialGradient id="ps-dark-vig" cx="50%" cy="100%" r="80%">
+      <stop offset="0" stop-color="#000" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="4" y="4" width="112" height="112" rx="26" fill="url(#ps-dark-grad)"/>
+  <rect x="4" y="4" width="112" height="112" rx="26" fill="url(#ps-dark-vig)"/>
+
+  <g fill="none" stroke="#F4F6FC" stroke-linecap="round" stroke-linejoin="round" stroke-width="10">
+    <path d="M44 24H31a9 9 0 0 0-9 9v13"/>
+    <path d="M76 24h13a9 9 0 0 1 9 9v13"/>
+    <path d="M22 76v13a9 9 0 0 0 9 9h13"/>
+    <path d="M98 76v13a9 9 0 0 1-9 9H76"/>
+  </g>
+  <path d="M60 32c2 12 8 18 19 19-11 2-17 8-19 19-2-11-8-17-19-19 11-2 17-8 19-19Z" fill="#F4F6FC"/>
+  <path d="M60 38c1.5 8 5.5 12 13 13-7.5 1.5-11.5 5.5-13 13-1.5-7.5-5.5-11.5-13-13 7.5-1.5 11.5-5.5 13-13Z" fill="#090B12"/>
+  <circle cx="60" cy="51" r="3.5" fill="#22D3EE"/>
+
+  <g transform="translate(132 68)" font-family="Manrope, Inter, Arial, sans-serif">
+    <text fill="#F4F6FC" font-size="36" font-weight="750" letter-spacing="-1.5">Screenshot<tspan fill="#A89FFF" font-weight="500"> Studio</tspan></text>
+    <line x1="2" y1="12" x2="130" y2="12" stroke="#3E3F57" stroke-width="1"/>
+    <text x="2" y="28" fill="#7878A8" font-size="9" font-weight="600" letter-spacing="1.6">MAKE DETAILS MATTER</text>
+  </g>
+</svg>

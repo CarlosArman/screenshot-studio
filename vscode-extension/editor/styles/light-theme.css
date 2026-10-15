@@ -1,0 +1,286 @@
+/* Tema claro: tokens semánticos y contraste revisado para textos, iconos y acciones. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --app: #edf2ff;
+  --panel: rgba(255, 255, 255, .92);
+  --panel-soft: #e9eef9;
+  --line: rgba(34, 48, 78, .18);
+  --text: #17233b;
+  --muted: #4f5e78;
+  --shadow: rgba(37, 48, 80, .20);
+}
+
+:root[data-theme="light"] #app {
+  background: radial-gradient(circle at 50% -40%, #cddaff 0, #f8faff 47%, #edf2fa 100%);
+}
+
+:root[data-theme="light"] .topbar {
+  background: rgba(255, 255, 255, .88);
+}
+
+:root[data-theme="light"] .brand-dot {
+  box-shadow: 0 0 13px rgba(91, 78, 255, .48);
+}
+
+:root[data-theme="light"] .beta-badge,
+:root[data-theme="light"] kbd {
+  background: #e8edf8;
+  color: #33425c;
+  border-color: rgba(47, 61, 95, .18);
+}
+
+:root[data-theme="light"] .tool-btn,
+:root[data-theme="light"] .icon-btn {
+  color: #40506c;
+}
+
+:root[data-theme="light"] .theme-selector select {
+  color: #26364f;
+  background-color: #f8faff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%2340506c' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"), linear-gradient(145deg, #fff, #eef2fb);
+  border-color: rgba(47, 61, 95, .22);
+  box-shadow: inset 0 1px 0 #fff, 0 2px 5px rgba(37, 48, 80, .10);
+}
+
+:root[data-theme="light"] .theme-selector select:hover {
+  color: #17233b;
+  background-color: #eef2ff;
+  border-color: #7162e8;
+  box-shadow: inset 0 1px 0 #fff, 0 5px 12px rgba(67, 81, 128, .14);
+}
+
+:root[data-theme="light"] .field-row select {
+  color: #17233b;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='m4 6 4 4 4-4' stroke='%234b5b76' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"), linear-gradient(145deg, #fff, #eff3fb);
+  border-color: rgba(47, 61, 95, .22);
+  box-shadow: inset 0 1px 0 #fff, 0 2px 5px rgba(37, 48, 80, .10);
+}
+
+:root[data-theme="light"] .field-row select:hover {
+  background-color: #f5f7ff;
+  border-color: #7162e8;
+  box-shadow: inset 0 1px 0 #fff, 0 5px 12px rgba(67, 81, 128, .14);
+}
+
+:root[data-theme="light"] select option {
+  color: #17233b;
+  background: #fff;
+  font-weight: 600;
+}
+
+:root[data-theme="light"] select option:checked {
+  color: #fff;
+  background: #5b4ed8;
+}
+
+:root[data-theme="light"] .tool-btn:hover,
+:root[data-theme="light"] .icon-btn:hover {
+  color: #10203a;
+  background: #e1e7f2;
+}
+
+:root[data-theme="light"] .tool-btn.active {
+  color: #fff;
+}
+
+:root[data-theme="light"] .icon-btn {
+  background: rgba(255, 255, 255, .82);
+  border-color: rgba(47, 61, 95, .16);
+}
+
+:root[data-theme="light"] .icon-btn:disabled {
+  color: #53627b;
+  background: #e7ebf2;
+}
+
+:root[data-theme="light"] .panel {
+  background: var(--panel);
+}
+
+:root[data-theme="light"] .panel-section {
+  border-bottom-color: rgba(47, 61, 95, .12);
+}
+
+:root[data-theme="light"] .panel-section h3,
+:root[data-theme="light"] .preset-label {
+  color: #4b5b76;
+}
+
+:root[data-theme="light"] .panel-section h3::before {
+  background: linear-gradient(180deg, #6254d9, #0789a3);
+}
+
+:root[data-theme="light"] .capture-screen-btn {
+  color: #063f50;
+  background: #d9f2f3;
+  border-color: #3d8797;
+}
+
+:root[data-theme="light"] .capture-screen-btn:hover {
+  color: #063f50;
+  border-color: #0884a6;
+}
+
+:root[data-theme="light"] .chip,
+:root[data-theme="light"] .secondary-btn {
+  background: #f4f6fc;
+  color: #3d4c67;
+  border-color: rgba(47, 61, 95, .18);
+}
+
+:root[data-theme="light"] .secondary-btn {
+  color: #273751;
+  background-color: #f8faff;
+  background-image: linear-gradient(145deg, #fff, #eef2fb);
+  border-color: rgba(47, 61, 95, .24);
+  box-shadow: inset 0 1px 0 #fff, 0 2px 5px rgba(37, 48, 80, .10);
+}
+
+:root[data-theme="light"] .chip {
+  background-color: #f8faff;
+  background-image: linear-gradient(145deg, #fff, #eef2fb);
+  border-color: rgba(47, 61, 95, .22);
+  box-shadow: inset 0 1px 0 #fff, 0 1px 3px rgba(37, 48, 80, .10);
+}
+
+:root[data-theme="light"] .chip:hover {
+  color: #17233b;
+  background-color: #f1f4ff;
+  border-color: #7162e8;
+  box-shadow: inset 0 1px 0 #fff, 0 5px 12px rgba(67, 81, 128, .14);
+}
+
+:root[data-theme="light"] .chip.active {
+  color: #fff;
+  border-color: #5748d0;
+  background: linear-gradient(135deg, #5b4ed8, #39308f);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .24), 0 6px 16px rgba(77, 60, 206, .28);
+}
+
+:root[data-theme="light"] .chip.active:hover,
+:root[data-theme="light"] .chip.active:focus-visible {
+  color: #fff;
+  background: linear-gradient(135deg, #6659e5, #4238a5);
+  border-color: #4d3cce;
+}
+
+:root[data-theme="light"] .field-row {
+  color: #4b5b76;
+}
+
+:root[data-theme="light"] .field-row input[type="text"] {
+  color: #17233b;
+  background-color: #fff;
+  background-image: linear-gradient(145deg, #fff, #eff3fb);
+  border-color: rgba(47, 61, 95, .22);
+  box-shadow: inset 0 1px 0 #fff, 0 2px 5px rgba(37, 48, 80, .10);
+}
+
+:root[data-theme="light"] .field-row input[type="text"]::placeholder {
+  color: #71809a;
+}
+
+:root[data-theme="light"] .field-row input[type="text"]:hover {
+  background-color: #f5f7ff;
+  border-color: #7162e8;
+  box-shadow: inset 0 1px 0 #fff, 0 5px 12px rgba(67, 81, 128, .14);
+}
+
+:root[data-theme="light"] .position-controls input[type="number"] {
+  color: #17233b;
+  background: #fff;
+  border-color: rgba(47, 61, 95, .22);
+  box-shadow: inset 0 1px 0 #fff, 0 2px 5px rgba(37, 48, 80, .10);
+}
+
+:root[data-theme="light"] input[type="color"] {
+  background: #fff;
+  border-color: rgba(47, 61, 95, .22);
+  box-shadow: inset 0 1px 0 #fff, 0 2px 5px rgba(37, 48, 80, .10);
+}
+
+:root[data-theme="light"] .field-row input[type="range"]::-webkit-slider-thumb {
+  border-color: #fff;
+  box-shadow: 0 2px 7px rgba(37, 48, 80, .28);
+}
+
+:root[data-theme="light"] .field-row input[type="range"]::-moz-range-thumb {
+  border-color: #fff;
+  box-shadow: 0 2px 7px rgba(37, 48, 80, .28);
+}
+
+:root[data-theme="light"] .canvas-area {
+  background-color: #e7edf8;
+  background-image: linear-gradient(rgba(44, 55, 85, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(44, 55, 85, .08) 1px, transparent 1px);
+}
+
+:root[data-theme="light"] .empty-glow {
+  background: radial-gradient(circle, rgba(91, 92, 255, .19), transparent 67%);
+}
+
+:root[data-theme="light"] .tool-hint,
+:root[data-theme="light"] .zoom-controls {
+  background: rgba(255, 255, 255, .93);
+  border-color: rgba(40, 55, 90, .18);
+}
+
+:root[data-theme="light"] .tool-hint {
+  color: #075e59;
+  border-color: rgba(7, 120, 113, .30);
+}
+
+:root[data-theme="light"] .zoom-btn,
+:root[data-theme="light"] .zoom-reset,
+:root[data-theme="light"] .zoom-controls output {
+  color: #33425d;
+}
+
+:root[data-theme="light"] .zoom-btn:hover,
+:root[data-theme="light"] .zoom-reset:hover {
+  background: #e7ecf6;
+}
+
+:root[data-theme="light"] .properties-empty {
+  color: #4c5b75;
+  background: #f7f9fe;
+  border-color: rgba(47, 61, 95, .20);
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+:root[data-theme="light"] .layers-list li {
+  color: #44536d;
+}
+
+:root[data-theme="light"] .layers-list li:hover {
+  background: #e7ecf6;
+  color: #17233b;
+}
+
+:root[data-theme="light"] .export-card {
+  background: linear-gradient(145deg, rgba(112, 97, 255, .10), rgba(34, 211, 238, .09));
+  border-color: rgba(88, 76, 194, .22);
+  box-shadow: inset 0 1px 0 #fff, 0 3px 10px rgba(67, 81, 128, .08);
+}
+
+:root[data-theme="light"] .secondary-btn:hover {
+  background-color: #f1f4ff;
+  border-color: #7162e8;
+  color: #17233b;
+  box-shadow: inset 0 1px 0 #fff, 0 6px 14px rgba(67, 81, 128, .16);
+}
+
+:root[data-theme="light"] .brand-name {
+  color: #17233b;
+}
+
+:root[data-theme="light"] .brand-name-studio {
+  color: #5148c9;
+}
+
+/* El anillo de foco se mantiene distinguible en superficies claras. */
+:root[data-theme="light"] button:focus-visible,
+:root[data-theme="light"] input:focus-visible,
+:root[data-theme="light"] select:focus-visible {
+  outline-color: #155eef;
+}
