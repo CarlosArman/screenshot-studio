@@ -9,6 +9,7 @@ import { initAnnotations, setTool } from './annotations.js';
 import { initImageImport } from './image-import.js';
 import { initScreenCapture } from './screen-capture.js';
 import { initCropControls } from './crop.js';
+import { initProjectControls } from './projects.js';
 import { downloadExport, copyExport, syncExportAvailability } from './export.js';
 
 function selectAll(selector) {
@@ -27,12 +28,14 @@ const TOOL_HINTS = {
   select: 'Seleccionar: haz clic en una anotación existente para editarla o arrástrala para moverla.',
   text: 'Texto: haz clic sobre la captura para agregar un texto editable.',
   number: 'Número: haz clic sobre la captura para colocar un indicador numerado.',
+  emoji: 'Emoji: haz clic sobre la captura para insertar un emoji editable.',
   arrow: 'Flecha: arrastra sobre la captura para dibujar una flecha.',
   rect: 'Rectángulo: arrastra sobre la captura para marcar una zona.',
   ellipse: 'Círculo: arrastra sobre la captura para resaltar una zona.',
   pen: 'Pincel: arrastra sobre la captura para dibujar libremente.',
   highlighter: 'Resaltador: arrastra sobre la captura para destacar contenido.',
-  blur: 'Privacidad: arrastra sobre la captura para ocultar información.'
+  pixelate: 'Pixelar: arrastra sobre la captura para ocultar información mediante bloques irreversibles.',
+  blur: 'Desenfocar: arrastra sobre la captura para ocultar información de forma irreversible.'
 };
 
 function updateToolHint(tool) {
@@ -95,15 +98,15 @@ function initToolbar() {
 
   document.getElementById('undoBtn').addEventListener('click', () => history.undo());
   document.getElementById('redoBtn').addEventListener('click', () => history.redo());
-  document.getElementById('deleteBtn').addEventListener('click', () => {
-    const selected = store.getSelected();
-    if (!selected) {
-      updateToolHint('select');
-      document.getElementById('toolHint').value = 'Eliminar: primero selecciona una anotación (texto, flecha, figura o número).';
-      return;
-    }
-    store.removeAnnotation(selected.id);
-    document.getElementById('toolHint').value = 'Anotación eliminada. Selecciona otra anotación para editarla o moverla.';
+  document.getElementById('deleteAllBtn').addEventListener('click', () => {
+    if (!store.getState().annotations.length) return;
+    store.update({ annotations: [], selectedId: null }, { commit: true });
+    document.getElementById('toolHint').value = 'Todas las anotaciones fueron eliminadas.';
+  });
+  document.getElementById('removeImageBtn').addEventListener('click', () => {
+    if (!store.getState().image) return;
+    store.update({ image: null, annotations: [], selectedId: null }, { commit: true });
+    document.getElementById('toolHint').value = 'Imagen eliminada. Agrega una nueva captura para continuar.';
   });
   document.getElementById('exportBtn').addEventListener('click', downloadExport);
 }
@@ -155,6 +158,14 @@ const BACKGROUND_PRESETS = {
   lime: ['#84cc16', '#14b8a6']
 };
 
+const SOCIAL_PRESETS = {
+  x: { width: 1600, height: 900 },
+  linkedin: { width: 1200, height: 627 },
+  instagram: { width: 1080, height: 1080 },
+  instagramPortrait: { width: 1080, height: 1350 },
+  story: { width: 1080, height: 1920 }
+};
+
 function initBackgroundControls() {
   const bgSelector = document.getElementById('backgroundSelector');
   initSingleSelectKeyboardNavigation(bgSelector, '[data-bg]');
@@ -192,12 +203,14 @@ function createAccessibleAnnotation(type) {
   const size = { width: 180, height: 100 };
 
   if (type === 'text') return { ...base, ...origin, text: 'Texto', fontSize: 24 };
+  if (type === 'emoji') return { id: nextId(), type: 'emoji', ...origin, emoji: '😀', fontSize: 48 };
   if (type === 'number') {
     const count = store.getState().annotations.filter((annotation) => annotation.type === 'number').length + 1;
     return { ...base, ...origin, value: String(count), radius: 18 };
   }
   if (type === 'arrow') return { ...base, ...origin, x2: 260, y2: 160, strokeWidth: 4 };
-  if (type === 'blur') return { ...base, ...origin, ...size, strokeWidth: 4 };
+  if (type === 'pixelate') return { ...base, ...origin, ...size, strength: 12 };
+  if (type === 'blur') return { ...base, ...origin, ...size, strength: 14 };
   return { ...base, ...origin, ...size, strokeWidth: 4 };
 }
 
@@ -215,6 +228,16 @@ function initAccessibleAnnotationControls() {
 }
 
 function initCompositionControls() {
+  const presetSelector = document.getElementById('socialPreset');
+  presetSelector.addEventListener('change', () => {
+    const preset = SOCIAL_PRESETS[presetSelector.value];
+    history.beginGesture();
+    store.updateComposition(preset
+      ? { preset: presetSelector.value, outputWidth: preset.width, outputHeight: preset.height }
+      : { preset: 'free', outputWidth: null, outputHeight: null });
+    history.commitGesture();
+  });
+
   const config = [
     ['paddingRange', 'padding'],
     ['radiusRange', 'radius'],
@@ -225,7 +248,9 @@ function initCompositionControls() {
   config.forEach(([id, property]) => {
     const field = document.getElementById(id);
     field.addEventListener('pointerdown', () => history.beginGesture());
-    field.addEventListener('input', () => store.updateComposition({ [property]: Number(field.value) }));
+    field.addEventListener('input', () => {
+      store.updateComposition({ [property]: Number(field.value), preset: 'free', outputWidth: null, outputHeight: null });
+    });
     field.addEventListener('change', () => history.commitGesture());
   });
 }
@@ -248,12 +273,14 @@ function annotationLabel(annotation) {
   const labels = {
     text: 'Texto',
     number: `Número ${annotation.value}`,
+    emoji: `Emoji ${annotation.emoji || '😀'}`,
     arrow: 'Flecha',
     rect: 'Rectángulo',
     ellipse: 'Círculo',
     pen: 'Pincel',
     highlighter: 'Resaltador',
-    blur: 'Privacidad'
+    pixelate: 'Pixelado',
+    blur: 'Desenfoque'
   };
   return labels[annotation.type] || annotation.type;
 }
@@ -273,7 +300,20 @@ function renderLayers(state) {
     button.textContent = annotationLabel(annotation);
     button.setAttribute('aria-pressed', String(isSelected));
     button.addEventListener('click', () => store.select(annotation.id));
-    item.appendChild(button);
+
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.className = 'layer-remove-btn';
+    removeButton.textContent = '×';
+    removeButton.title = `Eliminar ${annotationLabel(annotation)}`;
+    removeButton.setAttribute('aria-label', removeButton.title);
+    removeButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      store.removeAnnotation(annotation.id);
+      document.getElementById('toolHint').value = 'Anotación eliminada.';
+    });
+
+    item.append(button, removeButton);
     list.appendChild(item);
   });
 
@@ -293,107 +333,130 @@ function createControl(label, element) {
   return row;
 }
 
+function appendRangeControl(panel, label, annotation, property, min, max, fallback) {
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.min = String(min);
+  input.max = String(max);
+  input.value = annotation[property] || fallback;
+  input.addEventListener('pointerdown', () => history.beginGesture());
+  input.addEventListener('input', () => store.updateAnnotation(annotation.id, { [property]: Number(input.value) }));
+  input.addEventListener('change', () => history.commitGesture());
+  panel.appendChild(createControl(label, input));
+}
+
+function appendPositionControls(panel, annotation) {
+  if (!('x' in annotation && 'y' in annotation)) return;
+  const position = document.createElement('div');
+  position.className = 'position-controls';
+  [['X', annotation.x], ['Y', annotation.y]].forEach(([label, current]) => {
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.value = Math.round(current);
+    input.step = '1';
+    input.setAttribute('aria-label', `Posición ${label}`);
+    input.addEventListener('focus', () => history.beginGesture());
+    input.addEventListener('change', () => updateAnnotationPosition(annotation, label.toLowerCase(), Number(input.value)));
+    position.appendChild(createControl(label, input));
+  });
+  panel.appendChild(position);
+}
+
+function updateAnnotationPosition(annotation, property, nextValue) {
+  const delta = nextValue - annotation[property];
+  let patch = { [property]: nextValue };
+
+  if (annotation.type === 'arrow') {
+    patch = property === 'x'
+      ? { x: nextValue, x2: annotation.x2 + delta }
+      : { y: nextValue, y2: annotation.y2 + delta };
+  }
+
+  store.updateAnnotation(annotation.id, patch, { commit: true });
+}
+
+function appendColorControl(panel, annotation) {
+  if (annotation.type === 'emoji') return;
+  const color = document.createElement('input');
+  color.type = 'color';
+  color.value = annotation.color || '#ef4444';
+  color.addEventListener('input', () => store.updateAnnotation(annotation.id, { color: color.value }));
+  panel.appendChild(createControl('Color', color));
+}
+
+function appendEmojiControls(panel, annotation) {
+  if (annotation.type !== 'emoji') return;
+  const emoji = document.createElement('select');
+  ['😀', '😍', '😂', '🔥', '🚀', '✅', '💡', '🎉', '⚠️', '💬', '👋', '❤️'].forEach((value) => emoji.add(new Option(value, value)));
+  emoji.value = annotation.emoji || '😀';
+  emoji.setAttribute('aria-label', 'Emoji');
+  emoji.addEventListener('change', () => store.updateAnnotation(annotation.id, { emoji: emoji.value }, { commit: true }));
+  panel.appendChild(createControl('Emoji', emoji));
+  appendRangeControl(panel, 'Tamaño', annotation, 'fontSize', 20, 160, 48);
+}
+
+function appendTextControls(panel, annotation) {
+  if (annotation.type !== 'text') return;
+  const text = document.createElement('input');
+  text.type = 'text';
+  text.value = annotation.text;
+  text.addEventListener('focus', () => history.beginGesture());
+  text.addEventListener('input', () => store.updateAnnotation(annotation.id, { text: text.value }));
+  text.addEventListener('change', () => history.commitGesture());
+  panel.appendChild(createControl('Texto', text));
+  appendRangeControl(panel, 'Tamaño', annotation, 'fontSize', 12, 96, 24);
+}
+
+function appendNumberControl(panel, annotation) {
+  if (annotation.type !== 'number') return;
+  const value = document.createElement('input');
+  value.type = 'text';
+  value.value = annotation.value;
+  value.maxLength = 3;
+  value.addEventListener('change', () => store.updateAnnotation(annotation.id, { value: value.value }, { commit: true }));
+  panel.appendChild(createControl('Número', value));
+}
+
+function appendPrivacyControl(panel, annotation) {
+  if (!['pixelate', 'blur'].includes(annotation.type)) return;
+  const isPixelate = annotation.type === 'pixelate';
+  appendRangeControl(panel, isPixelate ? 'Tamaño de píxel' : 'Intensidad', annotation, 'strength', isPixelate ? 4 : 2, 40, isPixelate ? 12 : 14);
+}
+
 function renderProperties(state) {
   const panel = document.getElementById('propertiesPanel');
-  const selected = state.annotations.find((a) => a.id === state.selectedId);
-
+  const selected = state.annotations.find((annotation) => annotation.id === state.selectedId);
   if (!selected) {
     panel.dataset.selectedId = '';
     panel.className = 'properties-empty';
     panel.textContent = 'Selecciona un elemento para editar sus propiedades.';
     return;
   }
-
-  if (panel.dataset.selectedId === selected.id && panel.contains(document.activeElement)) {
-    return;
-  }
+  if (panel.dataset.selectedId === selected.id && panel.contains(document.activeElement)) return;
 
   panel.dataset.selectedId = selected.id;
   panel.className = '';
   panel.replaceChildren();
-
-  if ('x' in selected && 'y' in selected) {
-    const position = document.createElement('div');
-    position.className = 'position-controls';
-    [['X', selected.x], ['Y', selected.y]].forEach(([label, current]) => {
-      const input = document.createElement('input');
-      input.type = 'number';
-      input.value = Math.round(current);
-      input.step = '1';
-      input.setAttribute('aria-label', `Posición ${label}`);
-      input.addEventListener('focus', () => history.beginGesture());
-      input.addEventListener('change', () => {
-        const property = label.toLowerCase();
-        const nextValue = Number(input.value);
-        const delta = nextValue - selected[property];
-        let patch = { [property]: nextValue };
-        if (selected.type === 'arrow') {
-          if (property === 'x') {
-            patch = { x: nextValue, x2: selected.x2 + delta };
-          } else {
-            patch = { y: nextValue, y2: selected.y2 + delta };
-          }
-        }
-        store.updateAnnotation(selected.id, patch, { commit: true });
-      });
-      position.appendChild(createControl(label, input));
-    });
-    panel.appendChild(position);
+  appendPositionControls(panel, selected);
+  appendColorControl(panel, selected);
+  if (['arrow', 'rect', 'ellipse', 'pen', 'highlighter'].includes(selected.type)) {
+    appendRangeControl(panel, 'Grosor', selected, 'strokeWidth', 1, 30, selected.type === 'highlighter' ? 22 : 4);
   }
-
-  const color = document.createElement('input');
-  color.type = 'color';
-  color.value = selected.color || '#ef4444';
-  color.addEventListener('input', () => store.updateAnnotation(selected.id, { color: color.value }));
-  panel.appendChild(createControl('Color', color));
-
-  if ('strokeWidth' in selected) {
-    const stroke = document.createElement('input');
-    stroke.type = 'range';
-    stroke.min = '1';
-    stroke.max = '30';
-    stroke.value = selected.strokeWidth;
-    stroke.addEventListener('pointerdown', () => history.beginGesture());
-    stroke.addEventListener('input', () => store.updateAnnotation(selected.id, { strokeWidth: Number(stroke.value) }));
-    stroke.addEventListener('change', () => history.commitGesture());
-    panel.appendChild(createControl('Grosor', stroke));
-  }
-
-  if (selected.type === 'text') {
-    const text = document.createElement('input');
-    text.type = 'text';
-    text.value = selected.text;
-    text.addEventListener('focus', () => history.beginGesture());
-    text.addEventListener('input', () => store.updateAnnotation(selected.id, { text: text.value }));
-    text.addEventListener('change', () => history.commitGesture());
-    panel.appendChild(createControl('Texto', text));
-
-    const fontSize = document.createElement('input');
-    fontSize.type = 'range';
-    fontSize.min = '12';
-    fontSize.max = '96';
-    fontSize.value = selected.fontSize || 24;
-    fontSize.addEventListener('pointerdown', () => history.beginGesture());
-    fontSize.addEventListener('input', () => store.updateAnnotation(selected.id, { fontSize: Number(fontSize.value) }));
-    fontSize.addEventListener('change', () => history.commitGesture());
-    panel.appendChild(createControl('Tamaño', fontSize));
-  }
-
-  if (selected.type === 'number') {
-    const value = document.createElement('input');
-    value.type = 'text';
-    value.value = selected.value;
-    value.maxLength = 3;
-    value.addEventListener('change', () => store.updateAnnotation(selected.id, { value: value.value }, { commit: true }));
-    panel.appendChild(createControl('Número', value));
-  }
+  appendEmojiControls(panel, selected);
+  appendTextControls(panel, selected);
+  appendNumberControl(panel, selected);
+  appendPrivacyControl(panel, selected);
 }
 
 function syncControlValues(state) {
-  const deleteButton = document.getElementById('deleteBtn');
-  deleteButton.disabled = !state.selectedId;
-  deleteButton.title = state.selectedId ? 'Eliminar anotación seleccionada (Supr)' : 'Selecciona una anotación para eliminarla';
-  deleteButton.setAttribute('aria-label', deleteButton.title);
+  const deleteAllButton = document.getElementById('deleteAllBtn');
+  const hasAnnotations = state.annotations.length > 0;
+  deleteAllButton.disabled = !hasAnnotations;
+  deleteAllButton.setAttribute('aria-disabled', String(!hasAnnotations));
+
+  const removeImageButton = document.getElementById('removeImageBtn');
+  removeImageButton.disabled = !state.image;
+  removeImageButton.setAttribute('aria-disabled', String(!state.image));
 
   document.getElementById('frameTheme').value = state.frame.theme;
   document.getElementById('frameTitle').value = state.frame.title;
@@ -403,6 +466,7 @@ function syncControlValues(state) {
   document.getElementById('radiusRange').value = state.composition.radius;
   document.getElementById('shadowRange').value = state.composition.shadow;
   document.getElementById('scaleRange').value = state.composition.scale;
+  document.getElementById('socialPreset').value = state.composition.preset || 'free';
   document.getElementById('paddingValue').value = `${state.composition.padding} px`;
   document.getElementById('radiusValue').value = `${state.composition.radius} px`;
   document.getElementById('shadowValue').value = `${state.composition.shadow}%`;
@@ -452,7 +516,10 @@ function initKeyboardShortcuts() {
     }
     if (editing) return;
 
-    const tools = { v: 'select', t: 'text', n: 'number', a: 'arrow', r: 'rect', o: 'ellipse', p: 'pen', h: 'highlighter', b: 'blur' };
+    const tools = {
+      v: 'select', t: 'text', n: 'number', e: 'emoji', a: 'arrow', r: 'rect',
+      o: 'ellipse', p: 'pen', h: 'highlighter', x: 'pixelate', b: 'blur'
+    };
     const tool = tools[event.key.toLowerCase()];
     if (tool) {
       event.preventDefault();
@@ -499,6 +566,7 @@ function boot() {
   initImageImport();
   initScreenCapture();
   initCropControls();
+  initProjectControls();
   initTheme();
   initToolbar();
   initFrameControls();

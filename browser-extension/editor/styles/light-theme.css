@@ -122,6 +122,16 @@
   border-color: #0884a6;
 }
 
+:root[data-theme="light"] .crop-reset-btn {
+  color: #4b5b76;
+}
+
+:root[data-theme="light"] .crop-reset-btn:hover {
+  color: #17233b;
+  background: #e7ecf6;
+  border-radius: 7px;
+}
+
 :root[data-theme="light"] .chip,
 :root[data-theme="light"] .secondary-btn {
   background: #f4f6fc;
@@ -187,11 +197,41 @@
   box-shadow: inset 0 1px 0 #fff, 0 5px 12px rgba(67, 81, 128, .14);
 }
 
-:root[data-theme="light"] .position-controls input[type="number"] {
+:root[data-theme="light"] .position-controls input[type="number"],
+:root[data-theme="light"] .resize-dimensions input {
   color: #17233b;
   background: #fff;
   border-color: rgba(47, 61, 95, .22);
   box-shadow: inset 0 1px 0 #fff, 0 2px 5px rgba(37, 48, 80, .10);
+}
+
+:root[data-theme="light"] .resize-controls,
+:root[data-theme="light"] .project-controls {
+  border-color: rgba(47, 61, 95, .16);
+  background: #f7f9fe;
+  box-shadow: inset 0 1px 0 #fff;
+}
+
+:root[data-theme="light"] .resize-controls h4,
+:root[data-theme="light"] .project-controls h4 {
+  color: #4b5b76;
+}
+
+:root[data-theme="light"] .resize-dimensions label,
+:root[data-theme="light"] .resize-lock {
+  color: #4b5b76;
+}
+
+:root[data-theme="light"] .resize-dimensions input:hover {
+  background: #f5f7ff;
+  border-color: #7162e8;
+}
+
+:root[data-theme="light"] .resize-controls .secondary-btn,
+:root[data-theme="light"] .project-controls .secondary-btn {
+  color: #273751;
+  border-color: rgba(88, 76, 194, .34);
+  background: linear-gradient(145deg, #f4f3ff, #e4f7fb);
 }
 
 :root[data-theme="light"] input[type="color"] {

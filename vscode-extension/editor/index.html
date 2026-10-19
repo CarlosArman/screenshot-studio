@@ -43,15 +43,17 @@
       </div>
 
       <div class="topbar-tools" id="toolSelector" role="toolbar" aria-label="Herramientas de anotación">
-        <button class="tool-btn active" data-tool="select" type="button" title="Seleccionar (V)" aria-label="Seleccionar" aria-pressed="true">⬚</button>
-        <button class="tool-btn" data-tool="text" type="button" title="Texto (T)" aria-label="Agregar texto" aria-pressed="false">T</button>
-        <button class="tool-btn" data-tool="number" type="button" title="Número (N)" aria-label="Agregar número" aria-pressed="false">①</button>
-        <button class="tool-btn" data-tool="arrow" type="button" title="Flecha (A)" aria-label="Dibujar flecha" aria-pressed="false">↗</button>
-        <button class="tool-btn" data-tool="rect" type="button" title="Rectángulo (R)" aria-label="Dibujar rectángulo" aria-pressed="false">▭</button>
-        <button class="tool-btn" data-tool="ellipse" type="button" title="Círculo (O)" aria-label="Dibujar círculo" aria-pressed="false">◯</button>
-        <button class="tool-btn" data-tool="pen" type="button" title="Pincel (P)" aria-label="Dibujar con pincel" aria-pressed="false">✎</button>
-        <button class="tool-btn" data-tool="highlighter" type="button" title="Resaltador (H)" aria-label="Resaltar" aria-pressed="false">▰</button>
-        <button class="tool-btn" data-tool="blur" type="button" title="Ocultar información (B)" aria-label="Ocultar información sensible" aria-pressed="false">▓</button>
+        <button class="tool-btn tool-select" data-tool="select" type="button" title="Seleccionar (V)" aria-label="Seleccionar" aria-pressed="true">⌖</button>
+        <button class="tool-btn tool-text" data-tool="text" type="button" title="Texto (T)" aria-label="Agregar texto" aria-pressed="false">T</button>
+        <button class="tool-btn tool-number" data-tool="number" type="button" title="Número (N)" aria-label="Agregar número" aria-pressed="false">#</button>
+        <button class="tool-btn tool-emoji" data-tool="emoji" type="button" title="Emoji (E)" aria-label="Agregar emoji" aria-pressed="false">☺</button>
+        <button class="tool-btn tool-arrow" data-tool="arrow" type="button" title="Flecha (A)" aria-label="Dibujar flecha" aria-pressed="false">↗</button>
+        <button class="tool-btn tool-rect" data-tool="rect" type="button" title="Rectángulo (R)" aria-label="Dibujar rectángulo" aria-pressed="false">▭</button>
+        <button class="tool-btn tool-ellipse" data-tool="ellipse" type="button" title="Círculo (O)" aria-label="Dibujar círculo" aria-pressed="false">○</button>
+        <button class="tool-btn tool-pen" data-tool="pen" type="button" title="Pincel (P)" aria-label="Dibujar con pincel" aria-pressed="false">✎</button>
+        <button class="tool-btn tool-highlighter" data-tool="highlighter" type="button" title="Resaltador (H)" aria-label="Resaltar" aria-pressed="false">▰</button>
+        <button class="tool-btn tool-pixelate" data-tool="pixelate" type="button" title="Pixelar información (X)" aria-label="Pixelar información sensible" aria-pressed="false">▦</button>
+        <button class="tool-btn tool-blur" data-tool="blur" type="button" title="Desenfocar información (B)" aria-label="Desenfocar información sensible" aria-pressed="false">◌</button>
       </div>
 
       <div class="topbar-actions">
@@ -65,7 +67,7 @@
         </label>
         <button id="undoBtn" class="icon-btn" type="button" title="Deshacer (Ctrl+Z)" aria-label="Deshacer">↺</button>
         <button id="redoBtn" class="icon-btn" type="button" title="Rehacer (Ctrl+Y)" aria-label="Rehacer">↻</button>
-        <button id="deleteBtn" class="icon-btn" type="button" title="Eliminar (Supr)" aria-label="Eliminar anotación seleccionada">🗑</button>
+        <button id="deleteAllBtn" class="icon-btn" type="button" title="Eliminar todas las anotaciones" aria-label="Eliminar todas las anotaciones" disabled>🗑</button>
         <button id="exportBtn" class="primary-btn" type="button">Exportar</button>
       </div>
     </header>
@@ -75,6 +77,17 @@
         <section class="panel-section" aria-labelledby="imageSectionHeading">
           <h3 id="imageSectionHeading">Imagen</h3>
           <button id="captureScreenBtn" class="capture-screen-btn" type="button">⛶ <span>Capturar pantalla o ventana</span></button>
+          <button id="removeImageBtn" class="crop-reset-btn" type="button" disabled>Quitar imagen actual</button>
+          <div class="project-controls">
+            <h4>Proyecto local</h4>
+            <p class="panel-help">Guarda la imagen y todas sus anotaciones en un archivo JSON para continuar más tarde.</p>
+            <label class="sr-only" for="projectInput">Seleccionar archivo de proyecto JSON</label>
+            <input id="projectInput" type="file" accept="application/json,.json" hidden />
+            <div class="button-row">
+              <button id="saveProjectBtn" class="secondary-btn" type="button">Guardar proyecto</button>
+              <button id="loadProjectBtn" class="secondary-btn" type="button">Abrir proyecto</button>
+            </div>
+          </div>
         </section>
 
         <section class="panel-section" aria-labelledby="cropSectionHeading">
@@ -86,6 +99,16 @@
             <button id="cancelCropBtn" class="secondary-btn" type="button">Cancelar</button>
           </div>
           <button id="resetCropBtn" class="crop-reset-btn" type="button">Restablecer imagen original</button>
+          <div class="resize-controls" aria-label="Redimensionar imagen">
+            <h4>Redimensionar imagen</h4>
+            <p class="panel-help">Define el ancho y alto finales en píxeles. Mantén la proporción para evitar deformar la captura.</p>
+            <div class="resize-dimensions">
+              <label for="resizeWidth">Ancho<input id="resizeWidth" type="number" min="1" step="1" inputmode="numeric" /></label>
+              <label for="resizeHeight">Alto<input id="resizeHeight" type="number" min="1" step="1" inputmode="numeric" /></label>
+            </div>
+            <label class="resize-lock"><input id="resizeLock" type="checkbox" checked /> Mantener proporción</label>
+            <button id="applyResizeBtn" class="secondary-btn" type="button">Redimensionar imagen</button>
+          </div>
         </section>
 
         <section class="panel-section" aria-labelledby="frameSectionHeading">
@@ -139,6 +162,18 @@
 
         <section class="panel-section" aria-labelledby="compositionSectionHeading">
           <h3 id="compositionSectionHeading">Composición</h3>
+          <label class="field-row" for="socialPreset">
+            <span>Formato social</span>
+            <select id="socialPreset" aria-label="Preset de composición para redes sociales">
+              <option value="free">Libre</option>
+              <option value="x">X / Twitter · 1600 × 900</option>
+              <option value="linkedin">LinkedIn · 1200 × 627</option>
+              <option value="instagram">Instagram cuadrado · 1080 × 1080</option>
+              <option value="instagramPortrait">Instagram vertical · 1080 × 1350</option>
+              <option value="story">Stories y Reels · 1080 × 1920</option>
+            </select>
+          </label>
+          <p class="panel-help">Los presets centran la captura y exportan con las dimensiones indicadas.</p>
           <label class="field-row" for="paddingRange"><span>Padding</span><input type="range" id="paddingRange" min="0" max="200" value="64" aria-describedby="paddingValue" /><output id="paddingValue" class="range-value">64 px</output></label>
           <label class="field-row" for="radiusRange"><span>Radio</span><input type="range" id="radiusRange" min="0" max="60" value="12" aria-describedby="radiusValue" /><output id="radiusValue" class="range-value">12 px</output></label>
           <label class="field-row" for="shadowRange"><span>Sombra</span><input type="range" id="shadowRange" min="0" max="100" value="40" aria-describedby="shadowValue" /><output id="shadowValue" class="range-value">40%</output></label>
@@ -184,9 +219,11 @@
             <legend class="sr-only">Crear anotación</legend>
             <button class="secondary-btn" type="button" data-add-annotation="text">Agregar texto</button>
             <button class="secondary-btn" type="button" data-add-annotation="number">Agregar número</button>
+            <button class="secondary-btn" type="button" data-add-annotation="emoji">Agregar emoji</button>
             <button class="secondary-btn" type="button" data-add-annotation="rect">Agregar rectángulo</button>
             <button class="secondary-btn" type="button" data-add-annotation="arrow">Agregar flecha</button>
-            <button class="secondary-btn" type="button" data-add-annotation="blur">Agregar privacidad</button>
+            <button class="secondary-btn" type="button" data-add-annotation="pixelate">Agregar pixelado</button>
+            <button class="secondary-btn" type="button" data-add-annotation="blur">Agregar desenfoque</button>
           </fieldset>
         </section>
         <section class="panel-section" aria-labelledby="propertiesSectionHeading">
@@ -211,6 +248,5 @@
     <output id="appStatus" class="sr-only" aria-live="polite" aria-atomic="true"></output>
   </div>
   <script type="module" src="./js/app.js"></script>
-  <script type="module" src="./bridge-vscode.js"></script>
 </body>
 </html>

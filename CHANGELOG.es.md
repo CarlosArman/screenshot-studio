@@ -8,7 +8,7 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) y
   <a href="./CHANGELOG.md">🇬🇧 English</a> &nbsp;|&nbsp; <a href="./CHANGELOG.es.md">🇪🇸 Español</a>
 </p>
 
-## [Sin publicar]
+## [0.2.0] - 2026-10-19
 
 ### Añadido
 
@@ -19,6 +19,17 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) y
 - Modos de captura de extensión para el área visible, una parte seleccionada de la página y toda la página desplazable.
 - Selector visual de área de página con soporte para cancelar mediante `Esc`.
 - Iconos de extensión para Chrome/Edge (16, 32, 48 y 128 px) y VS Code (128 px), generados a partir del icono de marca del proyecto.
+- Herramientas de privacidad independientes para pixelar (`X`) y desenfocar (`B`) regiones sensibles, disponibles en la aplicación web y en los editores integrados de Chrome/Edge y VS Code.
+- Controles accesibles para crear anotaciones de pixelado o desenfoque y ajustar la intensidad de cada efecto.
+- Presets de composición para X/Twitter (1600 × 900), LinkedIn (1200 × 627), Instagram cuadrado (1080 × 1080), Instagram vertical (1080 × 1350) y Stories/Reels (1080 × 1920), disponibles en la aplicación web y en los editores integrados de Chrome/Edge y VS Code.
+- Los presets generan un lienzo de salida con dimensiones exactas y centran la captura ajustada proporcionalmente dentro de él.
+- Herramienta de emojis editable, disponible en la barra de anotaciones, mediante el atajo `E` y desde los controles accesibles; incluye un selector de emojis predefinidos y ajuste de tamaño desde Propiedades.
+- Acciones de eliminación contextuales mediante el botón × en cada capa de anotación.
+- Iconografía de las herramientas de anotación renovada para distinguir mejor su función.
+- Redimensionado de imagen por ancho y alto en píxeles, con bloqueo de proporción, suavizado de alta calidad y validación del límite de 24 megapíxeles.
+- Controladores visuales para redimensionar y rotar anotaciones seleccionadas, con historial deshacer/rehacer y guías excluidas de las exportaciones.
+- Guardado y carga de proyectos locales portables en JSON, con la imagen incorporada y el estado completo de composición y anotaciones.
+- Acción para quitar la imagen actual y limpieza global de anotaciones, además de la eliminación individual por capa.
 
 ### Corregido
 
@@ -26,6 +37,7 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) y
 - Restaurado el puente de la extensión hacia el editor empaquetado, para que las capturas de los tres modos se carguen en el lienzo automáticamente.
 - Las capturas de área visible y área seleccionada ahora apuntan explícitamente a la ventana de la pestaña activa, evitando que la extensión capture una ventana equivocada o no pueda obtener la imagen.
 - La captura de página completa ahora respeta la cuota de Chrome de dos llamadas por segundo a `captureVisibleTab`, con una espera y un reintento seguro ante límites de ventana deslizante.
+- Las guías visuales de selección ya no se dibujan en el canvas, por lo que no aparecen en las imágenes descargadas ni copiadas.
 
 ### Cambiado
 
@@ -33,13 +45,11 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) y
 - Las capturas de la extensión de navegador se transfieren mediante almacenamiento local al editor integrado, en vez de abrir la URL de datos de imagen cruda en una pestaña separada.
 - Mejora de etiquetas, feedback de estado, agrupación semántica y comportamiento de foco accesible en el popup de la extensión.
 - La captura de página completa restaura la posición de scroll original después de unir los segmentos capturados.
+- Los efectos de privacidad se rasterizan durante la composición final; las exportaciones contienen solo píxeles pixelados o desenfocados, sin una máscara ni región nítida recuperable.
+- Unificados los estilos de botones secundarios en los paneles de imagen, proyecto, recorte, redimensionado, anotaciones y exportación.
 
 ### Planificado
 
-- Pixelado o desenfoque irreversible para regiones de privacidad.
-- Presets de composición para redes sociales.
-- Recorte, redimensionado y rotación de imagen/anotaciones.
-- Soporte para guardar y cargar proyectos locales.
 - Pruebas automatizadas de canvas, accesibilidad y diseño responsive.
 
 ---
@@ -105,5 +115,6 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) y
 
 ---
 
-[Sin publicar]: https://github.com/CarlosArman/screenshot-studio/compare/v0.1.0...HEAD
+[Sin publicar]: https://github.com/CarlosArman/screenshot-studio/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/CarlosArman/screenshot-studio/releases/tag/v0.1.0

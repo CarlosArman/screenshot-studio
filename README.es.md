@@ -1,7 +1,7 @@
 # 📸 Screenshot Studio
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Versi%C3%B3n-0.1.0-blueviolet" alt="Versión" />
+  <img src="https://img.shields.io/badge/Versi%C3%B3n-0.2.0-blueviolet" alt="Versión" />
   <img src="https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white" alt="HTML5" />
   <img src="https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white" alt="CSS3" />
   <img src="https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript" />
@@ -64,8 +64,10 @@ La solución combina:
 - Captura de pantalla/ventana mediante APIs de display media.
 - Marcos macOS, Windows, Linux/GNOME, navegador, Safari, Chrome, terminal y genérico.
 - Controles de composición: fondo, padding, radio de esquina, sombra y escala.
-- Anotaciones de texto, números, flechas, figuras, pincel, resaltador y privacidad.
+- Anotaciones de texto, números, flechas, figuras, pincel, resaltador, pixelado y desenfoque de privacidad.
 - Deshacer/rehacer, capas, propiedades accesibles y atajos de teclado.
+- Eliminación de la imagen actual y limpieza global o individual de anotaciones.
+- Guardado y carga de proyectos locales portables en JSON.
 - Exportación PNG, JPEG y WebP con soporte de copia al portapapeles.
 - Vista checkerboard para composiciones transparentes.
 
@@ -92,6 +94,7 @@ La solución combina:
 - Marco de recorte visual: arrastra para moverlo, usa controladores en esquinas y bordes para redimensionarlo, y confirma con Aplicar o Cancelar.
 - El recorte elimina las zonas no deseadas sin ampliar ni interpolar la selección, por lo que conserva la nitidez nativa.
 - Permite restaurar la imagen original durante la sesión.
+- Redimensionado de imagen por ancho y alto en píxeles, con bloqueo opcional de proporción y un límite de 24 megapíxeles.
 - Al aplicar el recorte se eliminan las anotaciones existentes, ya que sus posiciones dejan de coincidir con la imagen recortada.
 
 ### 🎨 Controles de composición
@@ -99,6 +102,8 @@ La solución combina:
 - Fondos sólido, degradado y transparente.
 - Presets Aurora, Sunset, Ocean, Berry, Midnight y Lime.
 - Padding, radio, sombra y escala ajustables.
+- Presets de exportación para X/Twitter (1600 × 900), LinkedIn (1200 × 627), Instagram cuadrado (1080 × 1080), Instagram vertical (1080 × 1350) y Stories/Reels (1080 × 1920).
+- Cada preset centra y ajusta la captura dentro de un lienzo con dimensiones de salida exactas.
 - Temas claro/oscuro para la aplicación y los marcos.
 
 ### 🪟 Marcos de aplicación
@@ -116,14 +121,24 @@ La solución combina:
 ### ✏️ Herramientas de anotación
 
 - Selección y movimiento.
-- Texto y callouts numerados.
+- Texto, emojis editables con selector visual y callouts numerados.
+- Eliminación directa desde el botón × de cada capa.
 - Flechas, rectángulos y elipses.
 - Pincel y resaltador.
-- Máscara de privacidad.
+- Pixelado irreversible y desenfoque irreversible para ocultar regiones sensibles.
+- Intensidad ajustable para ambos efectos de privacidad.
 - Capas y propiedades editables.
+- Controladores visuales para redimensionar y rotar anotaciones seleccionadas; las guías no se incluyen en la exportación.
+
+### 💾 Proyectos locales
+
+- Guarda el documento completo como un archivo JSON portátil: imagen incorporada, marco, fondo, composición y anotaciones.
+- Abre un proyecto más tarde desde el mismo equipo, navegador, extensión Chrome/Edge o extensión de VS Code.
+- La carga valida el formato del proyecto y reinicia el historial para comenzar una nueva sesión de edición.
 
 ### 📤 Exportación
 
+- Botones secundarios con estilos uniformes en los paneles de imagen, proyecto, recorte, redimensionado, anotaciones y exportación.
 - Tarjeta de exportación con espaciado adicional alrededor de los botones Descargar y Copiar.
 - Formatos PNG, JPEG y WebP.
 - Calidad de salida ajustable.
@@ -163,12 +178,14 @@ Cada push a `main` despliega automáticamente el contenido de [`web/`](./web/) m
 | `V` | Seleccionar |
 | `T` | Texto |
 | `N` | Callout numerado |
+| `E` | Agregar emoji |
 | `A` | Flecha |
 | `R` | Rectángulo |
 | `O` | Elipse |
 | `P` | Pincel |
 | `H` | Resaltador |
-| `B` | Máscara de privacidad |
+| `X` | Pixelar información sensible |
+| `B` | Desenfocar información sensible |
 | `Ctrl/Cmd + Z` | Deshacer |
 | `Ctrl/Cmd + Shift + Z` o `Ctrl/Cmd + Y` | Rehacer |
 | `Supr` / `Backspace` | Eliminar anotación seleccionada |
@@ -260,21 +277,15 @@ screenshot-studio/
 
 ---
 
-## 🧪 Calidad, auditoría y roadmap
-
-La auditoría frontend, plan de remediación, casos QA y checklist están disponibles en:
-
-```text
-FRONTEND_AUDIT.md
-```
+## 🧪 Roadmap
 
 Próximas mejoras planificadas:
 
-- [ ] Pixelado o desenfoque irreversible para anotaciones de privacidad.
-- [ ] Presets para redes sociales.
-- [ ] Recorte y redimensionado de imagen.
-- [ ] Manejadores de redimensionado y rotación de anotaciones.
-- [ ] Guardar/cargar proyectos locales.
+- [x] Pixelado y desenfoque irreversibles para anotaciones de privacidad.
+- [x] Presets para redes sociales.
+- [x] Recorte y redimensionado de imagen.
+- [x] Manejadores de redimensionado y rotación de anotaciones.
+- [x] Guardar/cargar proyectos locales.
 - [ ] Pruebas automatizadas de canvas, accesibilidad y responsive.
 
 ---

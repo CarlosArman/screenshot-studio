@@ -1,7 +1,7 @@
 # 📸 Screenshot Studio
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-0.1.0-blueviolet" alt="Version" />
+  <img src="https://img.shields.io/badge/Version-0.2.0-blueviolet" alt="Version" />
   <img src="https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white" alt="HTML5" />
   <img src="https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white" alt="CSS3" />
   <img src="https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript" />
@@ -64,8 +64,10 @@ The solution combines:
 - Screenshot/window capture through browser display media APIs.
 - Realistic macOS, Windows, Linux/GNOME, browser, Safari, Chrome, terminal, and generic frames.
 - Composition controls: background, padding, corner radius, shadow, and scale.
-- Text, callout, arrow, shape, pen, highlighter, and privacy annotations.
+- Text, callout, arrow, shape, pen, highlighter, privacy pixelation, and privacy blur annotations.
 - Undo/redo, layers, accessible property controls, and keyboard shortcuts.
+- Current-image removal plus global or individual annotation clearing.
+- Portable local project saving and loading in JSON.
 - PNG, JPEG, and WebP export with clipboard copy support.
 - Checkerboard preview for transparent compositions.
 
@@ -92,6 +94,7 @@ The solution combines:
 - A visual crop frame with drag-to-move, corner and edge resize handles, an outside mask, and Apply/Cancel controls.
 - Cropping removes unwanted areas without enlarging or interpolating the selected pixels, preserving native sharpness.
 - Restores the original image during the current session when needed.
+- Resizes images by pixel width and height, with optional aspect-ratio locking and a 24 megapixel limit.
 - Applying a crop removes existing annotations because their coordinates no longer match the cropped image.
 
 ### 🎨 Composition controls
@@ -99,6 +102,8 @@ The solution combines:
 - Solid, gradient, and transparent backgrounds.
 - Aurora, Sunset, Ocean, Berry, Midnight, and Lime presets.
 - Adjustable padding, corner radius, drop shadow, and scale.
+- Export presets for X/Twitter (1600 × 900), LinkedIn (1200 × 627), Instagram square (1080 × 1080), Instagram portrait (1080 × 1350), and Stories/Reels (1080 × 1920).
+- Each preset centers and fits the screenshot within an exact output canvas.
 - Dark/light application theme and frame theme controls.
 
 ### 🪟 Application frames
@@ -116,14 +121,24 @@ The solution combines:
 ### ✏️ Annotation tools
 
 - Selection and movement.
-- Text and numbered callouts.
+- Text, editable emojis with a visual picker, and numbered callouts.
+- Direct deletion from the × button on each layer.
 - Arrows, rectangles, and ellipses.
 - Freehand pen and highlighter.
-- Privacy mask.
+- Irreversible pixelation and blur for sensitive regions.
+- Adjustable strength for both privacy effects.
 - Annotation layers and editable properties.
+- Visual resize and rotation handles for selected annotations; selection guides never appear in exports.
+
+### 💾 Local projects
+
+- Save the full document as a portable JSON file: embedded image, frame, background, composition, and annotations.
+- Reopen a project later from the same machine, browser, Chrome/Edge extension, or VS Code extension.
+- Loading validates the project format and resets history for a new editing session.
 
 ### 📤 Export
 
+- Uniform secondary button styling across image, project, crop, resize, annotation, and export panels.
 - Export card with additional spacing around the Download and Copy buttons.
 - PNG, JPEG, and WebP formats.
 - Adjustable output quality.
@@ -163,12 +178,14 @@ Pushes to `main` automatically deploy the contents of [`web/`](./web/) through [
 | `V` | Select |
 | `T` | Text |
 | `N` | Numbered callout |
+| `E` | Add emoji |
 | `A` | Arrow |
 | `R` | Rectangle |
 | `O` | Ellipse |
 | `P` | Pen |
 | `H` | Highlighter |
-| `B` | Privacy mask |
+| `X` | Pixelate sensitive information |
+| `B` | Blur sensitive information |
 | `Ctrl/Cmd + Z` | Undo |
 | `Ctrl/Cmd + Shift + Z` or `Ctrl/Cmd + Y` | Redo |
 | `Delete` / `Backspace` | Delete selected annotation |
@@ -260,21 +277,15 @@ screenshot-studio/
 
 ---
 
-## 🧪 Quality, Audit & Roadmap
-
-The complete frontend review, remediation plan, QA cases, and checklist are available in:
-
-```text
-FRONTEND_AUDIT.md
-```
+## 🧪 Roadmap
 
 Next planned improvements:
 
-- [ ] Irreversible pixelation or blur for privacy annotations.
-- [ ] Social-media composition presets.
-- [ ] Image crop and resize tools.
-- [ ] Annotation resize and rotation handles.
-- [ ] Local project save/load.
+- [x] Irreversible pixelation and blur for privacy annotations.
+- [x] Social-media composition presets.
+- [x] Image crop and resize tools.
+- [x] Annotation resize and rotation handles.
+- [x] Local project save/load.
 - [ ] Automated canvas, accessibility, and responsive tests.
 
 ---
