@@ -1,7 +1,7 @@
 # 📸 Screenshot Studio
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-0.2.0-blueviolet" alt="Version" />
+  <img src="https://img.shields.io/badge/Version-0.3.0-blueviolet" alt="Version" />
   <img src="https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white" alt="HTML5" />
   <img src="https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white" alt="CSS3" />
   <img src="https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript" />
@@ -123,12 +123,12 @@ The solution combines:
 - Selection and movement.
 - Text, editable emojis with a visual picker, and numbered callouts.
 - Direct deletion from the × button on each layer.
-- Arrows, rectangles, and ellipses.
-- Freehand pen and highlighter.
+- Arrows, rectangles, ellipses, freehand pen, and highlighter.
 - Irreversible pixelation and blur for sensitive regions.
 - Adjustable strength for both privacy effects.
 - Annotation layers and editable properties.
 - Visual resize and rotation handles for selected annotations; selection guides never appear in exports.
+- **Accessible Annotations** panel covers all 10 tool types with bidirectional toolbar sync: clicking an accessible annotation button activates the corresponding toolbar tool and vice versa.
 
 ### 💾 Local projects
 
@@ -136,7 +136,7 @@ The solution combines:
 - Reopen a project later from the same machine, browser, Chrome/Edge extension, or VS Code extension.
 - Loading validates the project format and resets history for a new editing session.
 
-### 📤 Export
+### 📤 Export & Share
 
 - Uniform secondary button styling across image, project, crop, resize, annotation, and export panels.
 - Export card with additional spacing around the Download and Copy buttons.
@@ -145,6 +145,9 @@ The solution combines:
 - Local download.
 - Clipboard copy when supported by the browser.
 - Transparency is preserved in the exported image.
+- **Share modal** with eight social platform shortcuts: X/Twitter, LinkedIn, WhatsApp, Telegram, Facebook, Reddit, Pinterest, and Instagram.
+- **Web Share API** integration — on supported browsers and devices the composed image is shared as a file directly via the native system sheet.
+- Platform buttons download the image automatically before opening the social network so it can be attached immediately.
 
 ---
 
@@ -263,6 +266,7 @@ screenshot-studio/
 │   │   ├── image-import.js
 │   │   ├── screen-capture.js
 │   │   ├── export.js
+│   │   ├── share.js
 │   │   └── status.js
 │   └── styles/
 │       ├── main.css
@@ -286,6 +290,8 @@ Next planned improvements:
 - [x] Image crop and resize tools.
 - [x] Annotation resize and rotation handles.
 - [x] Local project save/load.
+- [x] Social sharing modal with Web Share API and platform shortcuts.
+- [x] Accessible Annotations covering all tool types with bidirectional toolbar sync.
 - [ ] Automated canvas, accessibility, and responsive tests.
 
 ---

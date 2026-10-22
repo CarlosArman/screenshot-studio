@@ -8,6 +8,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   <a href="./CHANGELOG.md">🇬🇧 English</a> &nbsp;|&nbsp; <a href="./CHANGELOG.es.md">🇪🇸 Español</a>
 </p>
 
+## [Unreleased]
+
+---
+
+## [0.3.0] - 2026-10-22
+
+### Added
+
+- **Social sharing modal** — a Share button in the Export panel opens a modal with eight platform shortcuts: X/Twitter, LinkedIn, WhatsApp, Telegram, Facebook, Reddit, Pinterest, and Instagram.
+- **Web Share API** integration: when supported by the browser or device, the image file is shared directly via the native system sharing sheet (Android, iOS, desktop Chrome/Edge).
+- Platform buttons automatically download the composed image first, then open the corresponding social network in a new tab so the file can be attached immediately.
+- All platform icons use official brand SVGs inline (no external icon libraries required).
+- Share availability is synchronized with Export availability: the button is disabled until an image is loaded.
+- The modal is fully accessible: `role="dialog"`, `aria-modal`, `aria-labelledby`, `Escape` key dismissal, overlay-click dismissal, and focus returned to the trigger button on close.
+- **Accessible Annotations** now include all toolbar tool types: added Ellipse (circle), Pen, and Highlighter buttons to the panel, covering all 10 annotation tools.
+- **Bidirectional sync** between Accessible Annotations and the toolbar: clicking an accessible annotation button activates the corresponding toolbar tool, and selecting a toolbar tool highlights the corresponding accessible annotation button.
+- Accessible annotation coordinates now adapt dynamically to the current padding and frame bar height so annotations always appear within the image content area.
+
+### Fixed
+
+- Restored image pasting with `Ctrl + V` / `Cmd + V` by preventing single-key tool shortcuts from intercepting modified native clipboard shortcuts in the web app, Chrome/Edge extension, and VS Code editor.
+
+---
+
 ## [0.2.0] - 2026-10-19
 
 ### Added
@@ -113,6 +137,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-[Unreleased]: https://github.com/CarlosArman/screenshot-studio/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/CarlosArman/screenshot-studio/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/CarlosArman/screenshot-studio/releases/tag/v0.1.0

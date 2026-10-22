@@ -95,14 +95,39 @@ async function ensureImageLoaded(image) {
 
 function computeLayout(image, state) {
   const { composition, frame } = state;
-  const scale = (composition.scale || 100) / 100;
-  const contentWidth = (image.naturalWidth || image.width) * scale;
-  const contentHeight = (image.naturalHeight || image.height) * scale;
+  const imageWidth = image.naturalWidth || image.width;
+  const imageHeight = image.naturalHeight || image.height;
   const barHeight = frame.type === 'none' ? 0 : BAR_HEIGHT;
   const padding = composition.padding;
-  const logicalWidth = contentWidth + padding * 2;
-  const logicalHeight = contentHeight + barHeight + padding * 2;
+  const presetWidth = Number(composition.outputWidth);
+  const presetHeight = Number(composition.outputHeight);
+  const hasOutputPreset = Number.isFinite(presetWidth) && presetWidth > 0
+    && Number.isFinite(presetHeight) && presetHeight > 0;
+  const requestedScale = (composition.scale || 100) / 100;
+
+  let contentWidth = imageWidth * requestedScale;
+  let contentHeight = imageHeight * requestedScale;
+  let logicalWidth = contentWidth + padding * 2;
+  let logicalHeight = contentHeight + barHeight + padding * 2;
+
+  if (hasOutputPreset) {
+    logicalWidth = presetWidth;
+    logicalHeight = presetHeight;
+    const availableWidth = Math.max(1, logicalWidth - padding * 2);
+    const availableHeight = Math.max(1, logicalHeight - padding * 2 - barHeight);
+    const fitScale = Math.min(availableWidth / imageWidth, availableHeight / imageHeight);
+    const contentScale = Math.min(requestedScale, fitScale);
+    contentWidth = imageWidth * contentScale;
+    contentHeight = imageHeight * contentScale;
+  }
+
   const outputScale = Math.min(1, MAX_CANVAS_SIZE / Math.max(logicalWidth, logicalHeight));
+  const rect = {
+    x: hasOutputPreset ? (logicalWidth - contentWidth) / 2 : padding,
+    y: hasOutputPreset ? (logicalHeight - contentHeight + barHeight) / 2 : padding + barHeight,
+    width: contentWidth,
+    height: contentHeight
+  };
 
   return {
     logicalWidth,
@@ -111,12 +136,7 @@ function computeLayout(image, state) {
     canvasHeight: Math.max(1, Math.round(logicalHeight * outputScale)),
     outputScale,
     barHeight,
-    rect: {
-      x: padding,
-      y: padding + barHeight,
-      width: contentWidth,
-      height: contentHeight
-    }
+    rect
   };
 }
 

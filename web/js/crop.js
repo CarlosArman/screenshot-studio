@@ -196,6 +196,25 @@ function renderCrop(image, crop) {
   });
 }
 
+function renderResize(image, width, height) {
+  return new Promise((resolve, reject) => {
+    const source = new Image();
+    source.decoding = 'async';
+    source.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d');
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = 'high';
+      context.drawImage(source, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    source.onerror = () => reject(new Error('No se pudo procesar la imagen para el redimensionado.'));
+    source.src = image.src;
+  });
+}
+
 function setCropping(active) {
   isCropping = active;
   cropOverlay.hidden = !active;
@@ -275,6 +294,81 @@ function resetCrop() {
   reportStatus('Se restauró la imagen original a resolución nativa.', 'success');
 }
 
+function syncResizeFields(image) {
+  const width = document.getElementById('resizeWidth');
+  const height = document.getElementById('resizeHeight');
+  if (document.activeElement !== width) width.value = image?.width || '';
+  if (document.activeElement !== height) height.value = image?.height || '';
+}
+
+function syncResizeDimension(changedField) {
+  const image = store.getState().image;
+  const width = document.getElementById('resizeWidth');
+  const height = document.getElementById('resizeHeight');
+  if (!image || !document.getElementById('resizeLock').checked) return;
+
+  const value = Number(changedField.value);
+  if (!Number.isFinite(value) || value < 1) return;
+  const ratio = image.width / image.height;
+  const pairedField = changedField === width ? height : width;
+  pairedField.value = Math.max(1, Math.round(changedField === width ? value / ratio : value * ratio));
+}
+
+async function applyResize() {
+  const image = store.getState().image;
+  const width = Math.round(Number(document.getElementById('resizeWidth').value));
+  const height = Math.round(Number(document.getElementById('resizeHeight').value));
+  if (!image || !Number.isFinite(width) || !Number.isFinite(height) || width < 1 || height < 1) {
+    reportStatus('Indica un ancho y alto válidos para redimensionar.', 'error');
+    return;
+  }
+  if (width * height > 24_000_000) {
+    reportStatus('El tamaño final supera el límite de 24 megapíxeles.', 'error');
+    return;
+  }
+
+  const button = document.getElementById('applyResizeBtn');
+  button.disabled = true;
+  button.textContent = 'Redimensionando…';
+  try {
+    const src = await renderResize(image, width, height);
+    store.update({
+      image: {
+        src,
+        width,
+        height,
+        name: image.name || 'captura-redimensionada.png',
+        original: image.original || {
+          src: image.src,
+          width: image.width,
+          height: image.height,
+          name: image.name || 'captura.png'
+        }
+      },
+      annotations: [],
+      selectedId: null
+    }, { commit: true });
+    reportStatus('Imagen redimensionada. Se eliminaron las anotaciones existentes.', 'success');
+  } catch (error) {
+    reportStatus(error.message || 'No se pudo redimensionar la imagen.', 'error');
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Redimensionar imagen';
+  }
+}
+
+function syncImageControls(state) {
+  const hasImage = Boolean(state.image);
+  document.getElementById('startCropBtn').disabled = !hasImage;
+  document.getElementById('resetCropBtn').disabled = !state.image?.original;
+  document.getElementById('resizeWidth').disabled = !hasImage;
+  document.getElementById('resizeHeight').disabled = !hasImage;
+  document.getElementById('resizeLock').disabled = !hasImage;
+  document.getElementById('applyResizeBtn').disabled = !hasImage;
+  syncResizeFields(state.image);
+  if (isCropping) requestAnimationFrame(renderOverlay);
+}
+
 export function initCropControls() {
   createOverlay();
 
@@ -282,11 +376,10 @@ export function initCropControls() {
   document.getElementById('applyCropBtn').addEventListener('click', () => void applyCrop());
   document.getElementById('cancelCropBtn').addEventListener('click', cancelCrop);
   document.getElementById('resetCropBtn').addEventListener('click', resetCrop);
+  document.getElementById('resizeWidth').addEventListener('input', (event) => syncResizeDimension(event.target));
+  document.getElementById('resizeHeight').addEventListener('input', (event) => syncResizeDimension(event.target));
+  document.getElementById('applyResizeBtn').addEventListener('click', () => void applyResize());
 
-  store.subscribe((state) => {
-    const hasImage = Boolean(state.image);
-    document.getElementById('startCropBtn').disabled = !hasImage;
-    document.getElementById('resetCropBtn').disabled = !state.image?.original;
-    if (isCropping) requestAnimationFrame(renderOverlay);
-  });
+  store.subscribe(syncImageControls);
+  syncImageControls(store.getState());
 }

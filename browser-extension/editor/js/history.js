@@ -92,6 +92,14 @@ class History {
     this.updateButtons();
   }
 
+  reset() {
+    this.gestureStart = null;
+    this.undoStack = [];
+    this.redoStack = [];
+    this.lastSnapshot = store.snapshot();
+    this.updateButtons();
+  }
+
   updateButtons() {
     const undoBtn = document.getElementById('undoBtn');
     const redoBtn = document.getElementById('redoBtn');

@@ -1,7 +1,7 @@
 # 📸 Screenshot Studio
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Versi%C3%B3n-0.2.0-blueviolet" alt="Versión" />
+  <img src="https://img.shields.io/badge/Versi%C3%B3n-0.3.0-blueviolet" alt="Versión" />
   <img src="https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white" alt="HTML5" />
   <img src="https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white" alt="CSS3" />
   <img src="https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript" />
@@ -123,12 +123,12 @@ La solución combina:
 - Selección y movimiento.
 - Texto, emojis editables con selector visual y callouts numerados.
 - Eliminación directa desde el botón × de cada capa.
-- Flechas, rectángulos y elipses.
-- Pincel y resaltador.
+- Flechas, rectángulos, elipses, pincel y resaltador.
 - Pixelado irreversible y desenfoque irreversible para ocultar regiones sensibles.
 - Intensidad ajustable para ambos efectos de privacidad.
 - Capas y propiedades editables.
 - Controladores visuales para redimensionar y rotar anotaciones seleccionadas; las guías no se incluyen en la exportación.
+- El panel **Anotaciones Accesibles** cubre los 10 tipos de herramienta con sincronización bidireccional con el toolbar: al hacer clic en un botón de anotación accesible se activa la herramienta correspondiente en el toolbar y viceversa.
 
 ### 💾 Proyectos locales
 
@@ -136,7 +136,7 @@ La solución combina:
 - Abre un proyecto más tarde desde el mismo equipo, navegador, extensión Chrome/Edge o extensión de VS Code.
 - La carga valida el formato del proyecto y reinicia el historial para comenzar una nueva sesión de edición.
 
-### 📤 Exportación
+### 📤 Exportación y compartir
 
 - Botones secundarios con estilos uniformes en los paneles de imagen, proyecto, recorte, redimensionado, anotaciones y exportación.
 - Tarjeta de exportación con espaciado adicional alrededor de los botones Descargar y Copiar.
@@ -145,6 +145,9 @@ La solución combina:
 - Descarga local.
 - Copia al portapapeles cuando el navegador lo permite.
 - Transparencia preservada en el archivo exportado.
+- **Modal de compartir** con accesos directos a ocho plataformas sociales: X/Twitter, LinkedIn, WhatsApp, Telegram, Facebook, Reddit, Pinterest e Instagram.
+- Integración con la **Web Share API** — en navegadores y dispositivos compatibles, la imagen compuesta se comparte como archivo directamente desde la hoja nativa del sistema.
+- Los botones de plataforma descargan la imagen automáticamente antes de abrir la red social para adjuntarla de inmediato.
 
 ---
 
@@ -263,6 +266,7 @@ screenshot-studio/
 │   │   ├── image-import.js
 │   │   ├── screen-capture.js
 │   │   ├── export.js
+│   │   ├── share.js
 │   │   └── status.js
 │   └── styles/
 │       ├── main.css
@@ -286,6 +290,8 @@ Próximas mejoras planificadas:
 - [x] Recorte y redimensionado de imagen.
 - [x] Manejadores de redimensionado y rotación de anotaciones.
 - [x] Guardar/cargar proyectos locales.
+- [x] Modal de compartir con Web Share API y accesos a plataformas sociales.
+- [x] Anotaciones Accesibles con los 10 tipos de herramienta y sincronización bidireccional con el toolbar.
 - [ ] Pruebas automatizadas de canvas, accesibilidad y responsive.
 
 ---

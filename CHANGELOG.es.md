@@ -8,6 +8,30 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) y
   <a href="./CHANGELOG.md">🇬🇧 English</a> &nbsp;|&nbsp; <a href="./CHANGELOG.es.md">🇪🇸 Español</a>
 </p>
 
+## [Sin publicar]
+
+---
+
+## [0.3.0] - 2026-10-22
+
+### Añadido
+
+- **Modal de compartir en redes sociales** — un botón Compartir en el panel de Exportación abre un modal con accesos directos a ocho plataformas: X/Twitter, LinkedIn, WhatsApp, Telegram, Facebook, Reddit, Pinterest e Instagram.
+- Integración con la **Web Share API**: cuando el navegador o dispositivo lo soporta, el archivo de imagen se comparte directamente mediante la hoja de compartir nativa del sistema (Android, iOS, Chrome/Edge de escritorio).
+- Los botones de plataforma descargan la imagen compuesta automáticamente y luego abren la red social en una nueva pestaña para que pueda adjuntarse de inmediato.
+- Todos los iconos de plataformas usan SVGs oficiales de marca en línea (sin librerías externas de iconos).
+- La disponibilidad del botón Compartir está sincronizada con la de Exportar: se desactiva hasta que se cargue una imagen.
+- El modal es completamente accesible: `role="dialog"`, `aria-modal`, `aria-labelledby`, cierre con `Escape`, cierre al hacer clic en el overlay y foco devuelto al botón disparador al cerrar.
+- **Anotaciones Accesibles** ahora incluye todos los tipos de herramienta del toolbar: añadidos los botones Agregar círculo, Agregar pincel y Agregar resaltador, cubriendo los 10 tipos de anotación.
+- **Sincronización bidireccional** entre Anotaciones Accesibles y el toolbar: al hacer clic en un botón de anotación accesible se activa la herramienta correspondiente en el toolbar, y al seleccionar una herramienta del toolbar se resalta el botón correspondiente en Anotaciones Accesibles.
+- Las coordenadas de las anotaciones accesibles se calculan dinámicamente a partir del padding actual y la altura de la barra del marco, de modo que siempre aparecen dentro del área de contenido de la imagen.
+
+### Corregido
+
+- Restaurado el pegado de imágenes con `Ctrl + V` / `Cmd + V`: los atajos de herramientas de una sola tecla ya no interceptan combinaciones nativas modificadas del portapapeles en la aplicación web, la extensión Chrome/Edge y el editor de VS Code.
+
+---
+
 ## [0.2.0] - 2026-10-19
 
 ### Añadido
@@ -115,6 +139,7 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) y
 
 ---
 
-[Sin publicar]: https://github.com/CarlosArman/screenshot-studio/compare/v0.2.0...HEAD
+[Sin publicar]: https://github.com/CarlosArman/screenshot-studio/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/CarlosArman/screenshot-studio/releases/tag/v0.1.0

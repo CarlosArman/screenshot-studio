@@ -11,6 +11,8 @@ import { initScreenCapture } from './screen-capture.js';
 import { initCropControls } from './crop.js';
 import { initProjectControls } from './projects.js';
 import { downloadExport, copyExport, syncExportAvailability } from './export.js';
+import { initShareControls, syncShareAvailability } from './share.js';
+import { BAR_HEIGHT } from './browser-frames.js';
 
 function selectAll(selector) {
   return [...document.querySelectorAll(selector)];
@@ -86,6 +88,7 @@ function initToolbar() {
       setActiveChip(toolbar, button);
       setTool(button.dataset.tool);
       updateToolHint(button.dataset.tool);
+      syncAccessibleAnnotationButtons(button.dataset.tool);
     });
     button.addEventListener('keydown', (event) => {
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
@@ -149,6 +152,28 @@ function initFrameControls() {
   title.addEventListener('change', () => history.commitGesture());
 }
 
+// Mapa de tipo de anotación accesible ↔ herramienta del toolbar
+const ANNOTATION_TOOL_MAP = {
+  text: 'text',
+  number: 'number',
+  emoji: 'emoji',
+  rect: 'rect',
+  arrow: 'arrow',
+  ellipse: 'ellipse',
+  pen: 'pen',
+  highlighter: 'highlighter',
+  pixelate: 'pixelate',
+  blur: 'blur'
+};
+
+function syncAccessibleAnnotationButtons(activeTool) {
+  document.querySelectorAll('[data-add-annotation]').forEach((button) => {
+    const isActive = ANNOTATION_TOOL_MAP[button.dataset.addAnnotation] === activeTool;
+    button.classList.toggle('active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+  });
+}
+
 const BACKGROUND_PRESETS = {
   aurora: ['#7c3aed', '#22d3ee'],
   sunset: ['#f43f5e', '#f59e0b'],
@@ -198,8 +223,11 @@ function initBackgroundControls() {
 }
 
 function createAccessibleAnnotation(type) {
+  const { composition, frame } = store.getState();
+  const padding = composition.padding || 0;
+  const barHeight = frame.type === 'none' ? 0 : BAR_HEIGHT;
   const base = { id: nextId(), type, color: '#ef4444' };
-  const origin = { x: 80, y: 80 };
+  const origin = { x: padding + 16, y: padding + barHeight + 16 };
   const size = { width: 180, height: 100 };
 
   if (type === 'text') return { ...base, ...origin, text: 'Texto', fontSize: 24 };
@@ -208,7 +236,21 @@ function createAccessibleAnnotation(type) {
     const count = store.getState().annotations.filter((annotation) => annotation.type === 'number').length + 1;
     return { ...base, ...origin, value: String(count), radius: 18 };
   }
-  if (type === 'arrow') return { ...base, ...origin, x2: 260, y2: 160, strokeWidth: 4 };
+  if (type === 'arrow') return { ...base, ...origin, x2: origin.x + 180, y2: origin.y + 80, strokeWidth: 4 };
+  if (type === 'pen' || type === 'highlighter') {
+    const points = [
+      { x: origin.x, y: origin.y },
+      { x: origin.x + 90, y: origin.y + 40 },
+      { x: origin.x + 180, y: origin.y }
+    ];
+    return {
+      ...base,
+      type,
+      points,
+      bounds: { x: origin.x, y: origin.y, width: 180, height: 40 },
+      strokeWidth: type === 'highlighter' ? 22 : 4
+    };
+  }
   if (type === 'pixelate') return { ...base, ...origin, ...size, strength: 12 };
   if (type === 'blur') return { ...base, ...origin, ...size, strength: 14 };
   return { ...base, ...origin, ...size, strokeWidth: 4 };
@@ -217,6 +259,12 @@ function createAccessibleAnnotation(type) {
 function initAccessibleAnnotationControls() {
   document.querySelectorAll('[data-add-annotation]').forEach((button) => {
     button.addEventListener('click', () => {
+      // Sincronizar herramienta activa en el toolbar
+      const toolName = ANNOTATION_TOOL_MAP[button.dataset.addAnnotation];
+      if (toolName) {
+        const toolButton = document.querySelector(`.tool-btn[data-tool="${toolName}"]`);
+        if (toolButton) toolButton.click();
+      }
       if (!store.getState().image) {
         document.getElementById('appStatus').value = 'Carga una imagen antes de crear una anotación.';
         return;
@@ -484,6 +532,7 @@ function syncControlValues(state) {
     button.setAttribute('aria-pressed', String(isActive));
   });
   syncExportAvailability(Boolean(state.image));
+  syncShareAvailability(Boolean(state.image));
 }
 
 function initKeyboardShortcuts() {
@@ -501,6 +550,7 @@ function initKeyboardShortcuts() {
       history.redo();
       return;
     }
+    if (event.ctrlKey || event.metaKey) return;
     if (!editing && event.key === 'Escape') {
       event.preventDefault();
       history.cancelGesture();
@@ -574,6 +624,7 @@ function boot() {
   initAccessibleAnnotationControls();
   initCompositionControls();
   initExportControls();
+  initShareControls();
   initZoomControls();
   initKeyboardShortcuts();
   initPanelToggles();

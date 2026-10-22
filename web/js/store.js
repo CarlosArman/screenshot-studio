@@ -25,7 +25,10 @@ export function createDefaultDocument() {
       padding: 64,
       radius: 12,
       shadow: 40,
-      scale: 100
+      scale: 100,
+      preset: 'free',
+      outputWidth: null,
+      outputHeight: null
     },
     annotations: [], // lista de capas de anotación
     selectedId: null

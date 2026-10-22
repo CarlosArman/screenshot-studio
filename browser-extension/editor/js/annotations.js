@@ -10,8 +10,13 @@ import { getCanvas, getCanvasCoordinateScale } from './canvas-editor.js';
 let currentTool = 'select';
 let drawing = null;
 let moving = null;
+let selectionOverlay;
+let selectionBox;
+let transformGesture = null;
 
 const DEFAULT_COLOR = '#ef4444';
+const TRANSFORMABLE_TYPES = new Set(['text', 'emoji', 'number', 'arrow', 'rect', 'ellipse', 'pen', 'highlighter']);
+const MIN_ANNOTATION_SIZE = 12;
 
 export function initAnnotations() {
   const canvas = getCanvas();
@@ -22,6 +27,11 @@ export function initAnnotations() {
   });
   window.addEventListener('pointerup', onPointerUp);
   window.addEventListener('pointercancel', cancelPointerGesture);
+  createSelectionOverlay();
+
+  store.subscribe((state) => {
+    renderSelectionOverlay(state.annotations.find((annotation) => annotation.id === state.selectedId));
+  });
 }
 
 export function setTool(tool) {
@@ -31,22 +41,31 @@ export function setTool(tool) {
 }
 
 export function drawAnnotationsOnContext(ctx, annotations) {
-  // Las máscaras de privacidad deben procesar los píxeles de la composición
-  // antes de dibujar anotaciones decorativas que podrían quedar encima.
+  // Los efectos se aplican al bitmap de la composición antes de las
+  // anotaciones decorativas. Al exportar, el resultado solo contiene los
+  // píxeles ya transformados, no una máscara reversible ni datos originales.
   annotations
-    .filter((annotation) => annotation.type === 'blur')
-    .forEach((annotation) => drawPixelatedRegion(ctx, annotation));
+    .filter((annotation) => annotation.type === 'pixelate' || annotation.type === 'blur')
+    .forEach((annotation) => drawPrivacyRegion(ctx, annotation));
 
   annotations
-    .filter((annotation) => annotation.type !== 'blur')
+    .filter((annotation) => annotation.type !== 'pixelate' && annotation.type !== 'blur')
     .forEach((annotation) => drawAnnotation(ctx, annotation));
 
-  const selected = store.getSelected();
-  if (selected) drawSelection(ctx, selected);
+  // La selección se gestiona en el panel de capas y propiedades. No se dibuja
+  // sobre el canvas para evitar que sus guías formen parte de una exportación.
 }
 
 function drawAnnotation(ctx, a) {
   ctx.save();
+  const annotationBox = getAnnotationBox(a);
+  if (a.rotation && annotationBox) {
+    const centerX = annotationBox.x + annotationBox.width / 2;
+    const centerY = annotationBox.y + annotationBox.height / 2;
+    ctx.translate(centerX, centerY);
+    ctx.rotate(a.rotation);
+    ctx.translate(-centerX, -centerY);
+  }
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.strokeStyle = a.color || DEFAULT_COLOR;
@@ -86,6 +105,14 @@ function drawAnnotation(ctx, a) {
     a.text.split('\n').forEach((line, index) => ctx.fillText(line, a.x, a.y + index * (a.fontSize || 24) * 1.25));
   }
 
+  if (a.type === 'emoji') {
+    const size = a.fontSize || 48;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `${size}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
+    ctx.textBaseline = 'top';
+    ctx.fillText(a.emoji || '😀', a.x, a.y);
+  }
+
   if (a.type === 'number') {
     const radius = a.radius || 18;
     ctx.fillStyle = a.color || DEFAULT_COLOR;
@@ -115,7 +142,7 @@ function drawAnnotation(ctx, a) {
   ctx.restore();
 }
 
-function drawPixelatedRegion(ctx, annotation, pixelSize = 12) {
+function drawPrivacyRegion(ctx, annotation) {
   const canvas = ctx.canvas;
   const coordinateScale = ctx.getTransform().a || 1;
   const x = Math.max(0, Math.floor(annotation.x));
@@ -127,31 +154,186 @@ function drawPixelatedRegion(ctx, annotation, pixelSize = 12) {
 
   if (width < 1 || height < 1) return;
 
-  const sourceX = Math.floor(x * coordinateScale);
-  const sourceY = Math.floor(y * coordinateScale);
-  const sourceWidth = Math.ceil(width * coordinateScale);
-  const sourceHeight = Math.ceil(height * coordinateScale);
+  const blurRadius = annotation.type === 'blur' ? Math.max(2, Number(annotation.strength) || 12) : 0;
+  // Se copia un margen alrededor de un desenfoque para que los bordes de la
+  // región también queden ocultos; copiar solo el rectángulo deja una franja
+  // nítida por la transparencia generada por el filtro.
+  const bleed = Math.ceil(blurRadius * 2);
+  const sourceX = Math.max(0, Math.floor((x - bleed) * coordinateScale));
+  const sourceY = Math.max(0, Math.floor((y - bleed) * coordinateScale));
+  const sourceRight = Math.min(canvas.width, Math.ceil((x + width + bleed) * coordinateScale));
+  const sourceBottom = Math.min(canvas.height, Math.ceil((y + height + bleed) * coordinateScale));
+  const sourceWidth = sourceRight - sourceX;
+  const sourceHeight = sourceBottom - sourceY;
   const source = document.createElement('canvas');
   source.width = sourceWidth;
   source.height = sourceHeight;
-  const sourceCtx = source.getContext('2d', { alpha: false });
+  const sourceCtx = source.getContext('2d', { alpha: true });
   sourceCtx.drawImage(canvas, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
 
-  const reduced = document.createElement('canvas');
-  reduced.width = Math.max(1, Math.ceil(sourceWidth / pixelSize));
-  reduced.height = Math.max(1, Math.ceil(sourceHeight / pixelSize));
-  const reducedCtx = reduced.getContext('2d', { alpha: false });
-  reducedCtx.imageSmoothingEnabled = false;
-  reducedCtx.drawImage(source, 0, 0, reduced.width, reduced.height);
-
   ctx.save();
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(reduced, 0, 0, reduced.width, reduced.height, x, y, width, height);
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([5, 4]);
-  ctx.strokeRect(x, y, width, height);
+  ctx.beginPath();
+  ctx.rect(x, y, width, height);
+  ctx.clip();
+
+  if (annotation.type === 'pixelate') {
+    const pixelSize = Math.max(4, Number(annotation.strength) || 12);
+    const reduced = document.createElement('canvas');
+    reduced.width = Math.max(1, Math.ceil(sourceWidth / pixelSize));
+    reduced.height = Math.max(1, Math.ceil(sourceHeight / pixelSize));
+    const reducedCtx = reduced.getContext('2d', { alpha: true });
+    reducedCtx.imageSmoothingEnabled = false;
+    reducedCtx.drawImage(source, 0, 0, reduced.width, reduced.height);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(reduced, 0, 0, reduced.width, reduced.height, x, y, width, height);
+  } else {
+    // El filtro se aplica sobre una copia aislada y se compone de nuevo en el
+    // canvas. Por ello el archivo exportado no conserva la región nítida.
+    ctx.filter = `blur(${blurRadius}px)`;
+    ctx.drawImage(
+      source,
+      sourceX / coordinateScale,
+      sourceY / coordinateScale,
+      sourceWidth / coordinateScale,
+      sourceHeight / coordinateScale
+    );
+  }
   ctx.restore();
+}
+
+function createSelectionOverlay() {
+  const layer = document.getElementById('overlayLayer');
+  selectionOverlay = document.createElement('div');
+  selectionOverlay.className = 'annotation-selection-overlay';
+  selectionOverlay.hidden = true;
+
+  selectionBox = document.createElement('div');
+  selectionBox.className = 'annotation-selection-box';
+  selectionBox.innerHTML = `
+    <span class="annotation-rotate-handle" data-transform="rotate" aria-label="Rotar anotación">↻</span>
+    <span class="annotation-resize-handle annotation-resize-nw" data-transform="nw" aria-label="Redimensionar desde esquina superior izquierda"></span>
+    <span class="annotation-resize-handle annotation-resize-n" data-transform="n" aria-label="Redimensionar desde borde superior"></span>
+    <span class="annotation-resize-handle annotation-resize-ne" data-transform="ne" aria-label="Redimensionar desde esquina superior derecha"></span>
+    <span class="annotation-resize-handle annotation-resize-e" data-transform="e" aria-label="Redimensionar desde borde derecho"></span>
+    <span class="annotation-resize-handle annotation-resize-se" data-transform="se" aria-label="Redimensionar desde esquina inferior derecha"></span>
+    <span class="annotation-resize-handle annotation-resize-s" data-transform="s" aria-label="Redimensionar desde borde inferior"></span>
+    <span class="annotation-resize-handle annotation-resize-sw" data-transform="sw" aria-label="Redimensionar desde esquina inferior izquierda"></span>
+    <span class="annotation-resize-handle annotation-resize-w" data-transform="w" aria-label="Redimensionar desde borde izquierdo"></span>`;
+  selectionOverlay.appendChild(selectionBox);
+  layer.appendChild(selectionOverlay);
+
+  selectionBox.addEventListener('pointerdown', beginTransform);
+  selectionBox.addEventListener('pointermove', updateTransform);
+  selectionBox.addEventListener('pointerup', endTransform);
+  selectionBox.addEventListener('pointercancel', endTransform);
+}
+
+function renderSelectionOverlay(annotation) {
+  if (!selectionOverlay) return;
+  if (!annotation || !TRANSFORMABLE_TYPES.has(annotation.type)) {
+    selectionOverlay.hidden = true;
+    return;
+  }
+
+  const box = getAnnotationBox(annotation);
+  if (!box) {
+    selectionOverlay.hidden = true;
+    return;
+  }
+
+  const scale = getCanvasCoordinateScale();
+  selectionOverlay.hidden = false;
+  selectionOverlay.style.left = `${box.x * scale}px`;
+  selectionOverlay.style.top = `${box.y * scale}px`;
+  selectionOverlay.style.width = `${Math.max(1, box.width * scale)}px`;
+  selectionOverlay.style.height = `${Math.max(1, box.height * scale)}px`;
+  selectionOverlay.style.transform = `rotate(${annotation.rotation || 0}rad)`;
+}
+
+function pointFromOverlayEvent(event) {
+  const stage = getCanvas().parentElement;
+  const box = stage.getBoundingClientRect();
+  const scale = getCanvasCoordinateScale();
+  return {
+    x: ((event.clientX - box.left) * (stage.offsetWidth / box.width)) / scale,
+    y: ((event.clientY - box.top) * (stage.offsetHeight / box.height)) / scale
+  };
+}
+
+function beginTransform(event) {
+  const selected = store.getSelected();
+  const action = event.target.closest('[data-transform]')?.dataset.transform;
+  if (!selected || !action || !TRANSFORMABLE_TYPES.has(selected.type)) return;
+
+  event.preventDefault();
+  event.stopPropagation();
+  const box = getAnnotationBox(selected);
+  transformGesture = { action, annotation: structuredClone(selected), box, center: { x: box.x + box.width / 2, y: box.y + box.height / 2 } };
+  history.beginGesture();
+  selectionBox.setPointerCapture(event.pointerId);
+}
+
+function updateTransform(event) {
+  if (!transformGesture) return;
+  const point = pointFromOverlayEvent(event);
+  const { action, annotation, center } = transformGesture;
+  const patch = action === 'rotate'
+    ? { rotation: Math.atan2(point.y - center.y, point.x - center.x) + Math.PI / 2 }
+    : resizeAnnotation(annotation, transformGesture.box, action, point);
+  store.updateAnnotation(annotation.id, patch, { silent: true });
+}
+
+function endTransform() {
+  if (!transformGesture) return;
+  transformGesture = null;
+  history.commitGesture();
+}
+
+function resizeAnnotation(annotation, box, handle, point) {
+  const nextBox = resizeBox(box, handle, point);
+  const scaleX = nextBox.width / Math.max(1, box.width);
+  const scaleY = nextBox.height / Math.max(1, box.height);
+  const scalePoint = (item) => ({
+    x: nextBox.x + (item.x - box.x) * scaleX,
+    y: nextBox.y + (item.y - box.y) * scaleY
+  });
+
+  if (annotation.type === 'rect' || annotation.type === 'ellipse') {
+    return { x: nextBox.x, y: nextBox.y, width: nextBox.width, height: nextBox.height };
+  }
+  if (annotation.type === 'text' || annotation.type === 'emoji') {
+    return { x: nextBox.x, y: nextBox.y, fontSize: Math.max(MIN_ANNOTATION_SIZE, Math.round((annotation.fontSize || 24) * Math.min(scaleX, scaleY))) };
+  }
+  if (annotation.type === 'number') {
+    const center = scalePoint({ x: annotation.x, y: annotation.y });
+    return { ...center, radius: Math.max(8, Math.round((annotation.radius || 18) * Math.min(scaleX, scaleY))) };
+  }
+  if (annotation.type === 'arrow') {
+    return { ...scalePoint({ x: annotation.x, y: annotation.y }), ...Object.fromEntries(Object.entries(scalePoint({ x: annotation.x2, y: annotation.y2 })).map(([key, value]) => [`${key}2`, value])) };
+  }
+  if (annotation.type === 'pen' || annotation.type === 'highlighter') {
+    const points = annotation.points.map(scalePoint);
+    return { points, bounds: getPointsBounds(points), strokeWidth: Math.max(1, (annotation.strokeWidth || 4) * Math.min(scaleX, scaleY)) };
+  }
+  return {};
+}
+
+function resizeBox(box, handle, point) {
+  let { x, y, width, height } = box;
+  const right = x + width;
+  const bottom = y + height;
+
+  if (handle.includes('w')) {
+    x = Math.min(point.x, right - MIN_ANNOTATION_SIZE);
+    width = right - x;
+  }
+  if (handle.includes('e')) width = Math.max(MIN_ANNOTATION_SIZE, point.x - x);
+  if (handle.includes('n')) {
+    y = Math.min(point.y, bottom - MIN_ANNOTATION_SIZE);
+    height = bottom - y;
+  }
+  if (handle.includes('s')) height = Math.max(MIN_ANNOTATION_SIZE, point.y - y);
+  return { x, y, width, height };
 }
 
 function pointFromEvent(event) {
@@ -197,6 +379,13 @@ function onPointerDown(event) {
     return;
   }
 
+  if (currentTool === 'emoji') {
+    store.addAnnotation({
+      id: nextId(), type: 'emoji', x: p.x, y: p.y, emoji: '😀', fontSize: 48
+    });
+    return;
+  }
+
   history.beginGesture();
   drawing = { tool: currentTool, start: p, points: [p] };
 }
@@ -229,9 +418,10 @@ function onPointerMove(event) {
 }
 
 function cancelPointerGesture() {
-  if (!moving && !drawing) return;
+  if (!moving && !drawing && !transformGesture) return;
   moving = null;
   drawing = null;
+  transformGesture = null;
   removeTemporary();
   history.cancelGesture();
   getCanvas().style.cursor = currentTool === 'select' ? 'default' : 'crosshair';
@@ -287,8 +477,17 @@ function buildAnnotation(draft, id = nextId()) {
 
   if (Math.abs(w) < 3 && Math.abs(h) < 3) return null;
   if (tool === 'arrow') return { id, type: 'arrow', x: start.x, y: start.y, x2: end.x, y2: end.y, color: DEFAULT_COLOR, strokeWidth: 4 };
-  if (tool === 'rect' || tool === 'ellipse' || tool === 'blur') {
-    return { id, type: tool, x: Math.min(start.x, end.x), y: Math.min(start.y, end.y), width: Math.abs(w), height: Math.abs(h), color: DEFAULT_COLOR, strokeWidth: 4 };
+  if (tool === 'rect' || tool === 'ellipse' || tool === 'pixelate' || tool === 'blur') {
+    return {
+      id,
+      type: tool,
+      x: Math.min(start.x, end.x),
+      y: Math.min(start.y, end.y),
+      width: Math.abs(w),
+      height: Math.abs(h),
+      ...(tool === 'rect' || tool === 'ellipse' ? { color: DEFAULT_COLOR, strokeWidth: 4 } : {}),
+      strength: tool === 'pixelate' ? 12 : 14
+    };
   }
   return null;
 }
@@ -298,6 +497,10 @@ function findAnnotationAt(p) {
   return annotations.find((a) => {
     if (a.type === 'number') return Math.hypot(p.x - a.x, p.y - a.y) <= (a.radius || 18) + 6;
     if (a.type === 'text') return p.x >= a.x && p.x <= a.x + a.text.length * (a.fontSize || 24) && p.y >= a.y && p.y <= a.y + (a.fontSize || 24) * 1.4;
+    if (a.type === 'emoji') {
+      const size = a.fontSize || 48;
+      return p.x >= a.x && p.x <= a.x + size && p.y >= a.y && p.y <= a.y + size;
+    }
     const box = getAnnotationBox(a);
     return box && p.x >= box.x - 8 && p.x <= box.x + box.width + 8 && p.y >= box.y - 8 && p.y <= box.y + box.height + 8;
   });
@@ -312,6 +515,9 @@ function drawSelection(ctx, annotation) {
   } else if (annotation.type === 'text') {
     const fontSize = annotation.fontSize || 24;
     box = { x: annotation.x, y: annotation.y, width: Math.max(50, annotation.text.length * fontSize * .62), height: fontSize * 1.3 };
+  } else if (annotation.type === 'emoji') {
+    const fontSize = annotation.fontSize || 48;
+    box = { x: annotation.x, y: annotation.y, width: fontSize, height: fontSize };
   }
 
   if (!box) return;
@@ -324,9 +530,19 @@ function drawSelection(ctx, annotation) {
 }
 
 function getAnnotationBox(a) {
-  if (a.type === 'arrow') return { x: Math.min(a.x, a.x2), y: Math.min(a.y, a.y2), width: Math.abs(a.x2 - a.x), height: Math.abs(a.y2 - a.y) };
-  if (a.type === 'pen' || a.type === 'highlighter') {
-    return a.bounds || getPointsBounds(a.points || []);
+  if (a.type === 'arrow') return { x: Math.min(a.x, a.x2), y: Math.min(a.y, a.y2), width: Math.max(1, Math.abs(a.x2 - a.x)), height: Math.max(1, Math.abs(a.y2 - a.y)) };
+  if (a.type === 'pen' || a.type === 'highlighter') return a.bounds || getPointsBounds(a.points || []);
+  if (a.type === 'number') {
+    const radius = a.radius || 18;
+    return { x: a.x - radius, y: a.y - radius, width: radius * 2, height: radius * 2 };
+  }
+  if (a.type === 'text') {
+    const size = a.fontSize || 24;
+    return { x: a.x, y: a.y, width: Math.max(50, a.text.length * size * .62), height: size * 1.3 };
+  }
+  if (a.type === 'emoji') {
+    const size = a.fontSize || 48;
+    return { x: a.x, y: a.y, width: size, height: size };
   }
   if ('width' in a) return { x: a.x, y: a.y, width: a.width, height: a.height };
   return null;
