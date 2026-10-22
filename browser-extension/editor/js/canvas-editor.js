@@ -24,6 +24,13 @@ let canvasWasScaled = false;
 let canvasCoordinateScale = 1;
 let imageRect = null;
 
+// ── Pan con Espacio+drag ──────────────────────────────────────
+let spaceHeld = false;
+let panning = false;
+let panScrollStart = null;
+
+export function isSpaceHeld() { return spaceHeld; }
+
 export function initCanvasEditor() {
   canvas = document.getElementById('mainCanvas');
   ctx = canvas.getContext('2d');
@@ -31,6 +38,68 @@ export function initCanvasEditor() {
 
   store.subscribe(() => scheduleRender());
   scheduleRender();
+
+  initWheelZoom();
+  initPan();
+}
+
+function initWheelZoom() {
+  const canvasArea = document.getElementById('canvasArea');
+  if (!canvasArea) return;
+  canvasArea.addEventListener('wheel', (event) => {
+    if (!event.ctrlKey && !event.metaKey) return;
+    event.preventDefault();
+    const delta = event.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+    setZoom(zoom + delta);
+  }, { passive: false });
+}
+
+function initPan() {
+  const canvasArea = document.getElementById('canvasArea');
+  if (!canvasArea) return;
+
+  window.addEventListener('keydown', (event) => {
+    if (event.code !== 'Space') return;
+    const activeTag = document.activeElement?.tagName;
+    if (activeTag === 'INPUT' || activeTag === 'SELECT' || activeTag === 'TEXTAREA') return;
+    event.preventDefault();
+    if (!spaceHeld) {
+      spaceHeld = true;
+      if (canvas) canvas.style.cursor = 'grab';
+    }
+  });
+
+  window.addEventListener('keyup', (event) => {
+    if (event.code !== 'Space') return;
+    spaceHeld = false;
+    if (!panning && canvas) canvas.style.cursor = 'default';
+  });
+
+  // Captura en fase de captura para interceptar antes que annotations.js
+  canvas && canvas.addEventListener('pointerdown', (event) => {
+    if (!spaceHeld) return;
+    event.preventDefault();
+    event.stopPropagation();
+    panning = true;
+    canvas.style.cursor = 'grabbing';
+    canvas.setPointerCapture(event.pointerId);
+    panScrollStart = {
+      x: event.clientX + canvasArea.scrollLeft,
+      y: event.clientY + canvasArea.scrollTop
+    };
+  }, true);
+
+  canvas && canvas.addEventListener('pointermove', (event) => {
+    if (!panning) return;
+    canvasArea.scrollLeft = panScrollStart.x - event.clientX;
+    canvasArea.scrollTop = panScrollStart.y - event.clientY;
+  }, true);
+
+  window.addEventListener('pointerup', () => {
+    if (!panning) return;
+    panning = false;
+    if (canvas) canvas.style.cursor = spaceHeld ? 'grab' : 'default';
+  });
 }
 
 export function scheduleRender() {

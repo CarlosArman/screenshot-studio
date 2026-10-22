@@ -13,8 +13,22 @@ function getMimeType(format) {
 function getExportOptions() {
   return {
     format: document.getElementById('exportFormat').value,
-    quality: Number(document.getElementById('exportQuality').value) / 100
+    quality: Number(document.getElementById('exportQuality').value) / 100,
+    scale: Number(document.getElementById('exportScale')?.value || 1)
   };
+}
+
+/** Devuelve el canvas fuente para exportar, escalado si se solicita > 1×. */
+function getExportCanvas(sourceCanvas, scale) {
+  if (scale <= 1) return sourceCanvas;
+  const off = document.createElement('canvas');
+  off.width = Math.round(sourceCanvas.width * scale);
+  off.height = Math.round(sourceCanvas.height * scale);
+  const offCtx = off.getContext('2d');
+  offCtx.imageSmoothingEnabled = true;
+  offCtx.imageSmoothingQuality = 'high';
+  offCtx.drawImage(sourceCanvas, 0, 0, off.width, off.height);
+  return off;
 }
 
 function canvasToBlob(canvas, mime, quality) {
@@ -45,8 +59,9 @@ export async function downloadExport() {
 
   setExportBusy(true);
   try {
-    const { format, quality } = getExportOptions();
-    const blob = await canvasToBlob(canvas, getMimeType(format), quality);
+    const { format, quality, scale } = getExportOptions();
+    const exportCanvas = getExportCanvas(canvas, scale);
+    const blob = await canvasToBlob(exportCanvas, getMimeType(format), quality);
     const objectUrl = URL.createObjectURL(blob);
     const link = Object.assign(document.createElement('a'), {
       href: objectUrl,

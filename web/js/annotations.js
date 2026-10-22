@@ -5,7 +5,7 @@
 
 import { store, nextId } from './store.js';
 import { history } from './history.js';
-import { getCanvas, getCanvasCoordinateScale } from './canvas-editor.js';
+import { getCanvas, getCanvasCoordinateScale, getContext, isSpaceHeld } from './canvas-editor.js';
 
 let currentTool = 'select';
 let drawing = null;
@@ -346,7 +346,18 @@ function pointFromEvent(event) {
   };
 }
 
+function measureTextWidth(text, fontSize) {
+  const ctx = getContext();
+  if (!ctx) return (text?.length || 0) * (fontSize || 24) * 0.62;
+  ctx.save();
+  ctx.font = `${fontSize || 24}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+  const width = ctx.measureText(text || '').width;
+  ctx.restore();
+  return width;
+}
+
 function onPointerDown(event) {
+  if (isSpaceHeld()) return;
   const canvas = getCanvas();
   if (!canvas || !store.getState().image) return;
   const p = pointFromEvent(event);
@@ -496,7 +507,13 @@ function findAnnotationAt(p) {
   const annotations = [...store.getState().annotations].reverse();
   return annotations.find((a) => {
     if (a.type === 'number') return Math.hypot(p.x - a.x, p.y - a.y) <= (a.radius || 18) + 6;
-    if (a.type === 'text') return p.x >= a.x && p.x <= a.x + a.text.length * (a.fontSize || 24) && p.y >= a.y && p.y <= a.y + (a.fontSize || 24) * 1.4;
+    if (a.type === 'text') {
+      const fontSize = a.fontSize || 24;
+      const lines = (a.text || '').split('\n');
+      const maxWidth = Math.max(50, ...lines.map((line) => measureTextWidth(line, fontSize)));
+      const height = lines.length * fontSize * 1.25;
+      return p.x >= a.x && p.x <= a.x + maxWidth && p.y >= a.y && p.y <= a.y + height;
+    }
     if (a.type === 'emoji') {
       const size = a.fontSize || 48;
       return p.x >= a.x && p.x <= a.x + size && p.y >= a.y && p.y <= a.y + size;
@@ -504,29 +521,6 @@ function findAnnotationAt(p) {
     const box = getAnnotationBox(a);
     return box && p.x >= box.x - 8 && p.x <= box.x + box.width + 8 && p.y >= box.y - 8 && p.y <= box.y + box.height + 8;
   });
-}
-
-function drawSelection(ctx, annotation) {
-  let box = getAnnotationBox(annotation);
-
-  if (annotation.type === 'number') {
-    const radius = annotation.radius || 18;
-    box = { x: annotation.x - radius, y: annotation.y - radius, width: radius * 2, height: radius * 2 };
-  } else if (annotation.type === 'text') {
-    const fontSize = annotation.fontSize || 24;
-    box = { x: annotation.x, y: annotation.y, width: Math.max(50, annotation.text.length * fontSize * .62), height: fontSize * 1.3 };
-  } else if (annotation.type === 'emoji') {
-    const fontSize = annotation.fontSize || 48;
-    box = { x: annotation.x, y: annotation.y, width: fontSize, height: fontSize };
-  }
-
-  if (!box) return;
-  ctx.save();
-  ctx.strokeStyle = '#5eead4';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([6, 4]);
-  ctx.strokeRect(box.x - 6, box.y - 6, Math.max(12, box.width + 12), Math.max(12, box.height + 12));
-  ctx.restore();
 }
 
 function getAnnotationBox(a) {
@@ -538,7 +532,9 @@ function getAnnotationBox(a) {
   }
   if (a.type === 'text') {
     const size = a.fontSize || 24;
-    return { x: a.x, y: a.y, width: Math.max(50, a.text.length * size * .62), height: size * 1.3 };
+    const lines = (a.text || '').split('\n');
+    const maxWidth = Math.max(50, ...lines.map((line) => measureTextWidth(line, size)));
+    return { x: a.x, y: a.y, width: maxWidth, height: lines.length * size * 1.25 };
   }
   if (a.type === 'emoji') {
     const size = a.fontSize || 48;

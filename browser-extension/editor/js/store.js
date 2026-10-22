@@ -8,6 +8,50 @@ export function nextId() {
   return `el_${idCounter++}_${Date.now().toString(36)}`;
 }
 
+// ── Auto-guardado en localStorage ────────────────────────────
+const AUTO_SAVE_KEY = 'screenshot-studio-autosave';
+const AUTO_SAVE_DELAY = 1500;
+let autoSaveTimer = null;
+
+function scheduleAutoSave(state) {
+  if (autoSaveTimer) clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    try {
+      const { image, ...rest } = state;
+      // Si la imagen ya es una Data URL (ej: cargada desde proyecto) se guarda
+      // completa. Las Object URLs (blob:) no sobreviven entre sesiones, así que
+      // solo guardamos los metadatos para restaurarlos con una nueva importación.
+      const portableImage = image?.src?.startsWith('data:') ? image : null;
+      const payload = {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        document: { ...rest, image: portableImage }
+      };
+      localStorage.setItem(AUTO_SAVE_KEY, JSON.stringify(payload));
+    } catch {
+      // QuotaExceededError u otros — se ignora silenciosamente
+    }
+  }, AUTO_SAVE_DELAY);
+}
+
+/** Devuelve el documento auto-guardado o null si no existe / es inválido. */
+export function loadAutoSave() {
+  try {
+    const raw = localStorage.getItem(AUTO_SAVE_KEY);
+    if (!raw) return null;
+    const payload = JSON.parse(raw);
+    if (payload?.version !== 1 || !payload?.document) return null;
+    return payload.document;
+  } catch {
+    return null;
+  }
+}
+
+/** Borra el auto-guardado actual (p.ej. al cargar un proyecto explícito). */
+export function clearAutoSave() {
+  try { localStorage.removeItem(AUTO_SAVE_KEY); } catch { /* ignorar */ }
+}
+
 export function createDefaultDocument() {
   return {
     image: null, // { src, width, height }
@@ -108,6 +152,18 @@ class Store {
     this.removeAnnotation(this.state.selectedId);
   }
 
+  /** Mueve una anotación una posición hacia arriba (+1) o abajo (-1) en la pila. */
+  moveAnnotation(id, direction) {
+    const annotations = [...this.state.annotations];
+    const index = annotations.findIndex((a) => a.id === id);
+    if (index < 0) return;
+    const target = index + direction;
+    if (target < 0 || target >= annotations.length) return;
+    [annotations[index], annotations[target]] = [annotations[target], annotations[index]];
+    this.state = { ...this.state, annotations };
+    this.notify({ commit: true });
+  }
+
   select(id) {
     this.state = { ...this.state, selectedId: id };
     this.notify({ silent: true });
@@ -119,6 +175,7 @@ class Store {
 
   notify(opts = {}) {
     for (const fn of this.listeners) fn(this.state, opts);
+    if (!opts.silent) scheduleAutoSave(this.state);
   }
 
   subscribe(fn) {

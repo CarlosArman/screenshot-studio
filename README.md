@@ -1,7 +1,7 @@
 # 📸 Screenshot Studio
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-0.3.0-blueviolet" alt="Version" />
+  <img src="https://img.shields.io/badge/Version-0.4.0-blueviolet" alt="Version" />
   <img src="https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white" alt="HTML5" />
   <img src="https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white" alt="CSS3" />
   <img src="https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript" />
@@ -191,8 +191,13 @@ Pushes to `main` automatically deploy the contents of [`web/`](./web/) through [
 | `B` | Blur sensitive information |
 | `Ctrl/Cmd + Z` | Undo |
 | `Ctrl/Cmd + Shift + Z` or `Ctrl/Cmd + Y` | Redo |
+| `Ctrl/Cmd + D` | Duplicate selected annotation |
+| `←` `↑` `→` `↓` | Move annotation 1 px |
+| `Shift + ←↑→↓` | Move annotation 10 px |
 | `Delete` / `Backspace` | Delete selected annotation |
 | `Esc` | Cancel the active selection or gesture |
+| `Space + drag` | Pan the editing area |
+| `Ctrl/Cmd + scroll` | Zoom with the mouse wheel |
 
 ---
 
@@ -292,10 +297,22 @@ Next planned improvements:
 - [x] Local project save/load.
 - [x] Social sharing modal with Web Share API and platform shortcuts.
 - [x] Accessible Annotations covering all tool types with bidirectional toolbar sync.
+- [x] Annotation opacity and shape fill controls in the Properties panel.
+- [x] Arrow-key annotation movement and Ctrl+D duplicate.
+- [x] Copy and paste annotations (Ctrl+C / Ctrl+V, internal buffer).
+- [x] Reorder layers with up/down buttons in the Layers panel.
+- [x] Mouse wheel zoom and Space+drag pan.
+- [x] 2× HiDPI export scale.
+- [x] Auto-save to localStorage with session restoration.
+- [x] Installable PWA (manifest + service worker, works offline).
+- [x] MIT License.
+- [x] Correct Accessible Annotations behavior (tool selector with bidirectional sync).
+- [x] Share modal adapted to light theme.
+- [x] Distribution packages generated in `extensions/` (Chrome/Edge ZIP and VS Code VSIX).
 - [ ] Automated canvas, accessibility, and responsive tests.
 
 ---
 
 ## 📄 License
 
-This project is distributed for development and demonstration purposes. Add an explicit license before publishing a distributable release.
+This project is distributed under the **MIT License**. See the [`LICENSE`](./LICENSE) file for details.

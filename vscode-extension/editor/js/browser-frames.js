@@ -323,12 +323,6 @@ function drawBrowserButtons(ctx, x, y, color) {
   ctx.stroke();
 }
 
-function darkenColor(hex, amount) {
-  const value = Number.parseInt(hex.slice(1), 16);
-  const channel = (shift) => Math.max(0, ((value >> shift) & 255) - Math.round(255 * amount));
-  return `rgb(${channel(16)}, ${channel(8)}, ${channel(0)})`;
-}
-
 function drawSmallDot(ctx, x, y, color) {
   ctx.beginPath();
   ctx.fillStyle = color;

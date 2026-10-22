@@ -620,6 +620,23 @@ input[type="color"]::-webkit-color-swatch { border:0; border-radius:5px; }
 .layers-list li.selected { background:linear-gradient(100deg, rgba(113,98,255,.82), rgba(92,82,222,.82)); color:#fff; }
 .layer-button { flex:1; min-width:0; min-height:38px; display:flex; align-items:center; padding:8px; border:0; border-radius:7px; color:inherit; text-align:left; background:transparent; }
 .layer-button:hover { color:inherit; }
+.layer-order-btn {
+  width:22px;
+  height:22px;
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border:1px solid transparent;
+  border-radius:5px;
+  color:var(--muted);
+  background:transparent;
+  font-size:13px;
+  line-height:1;
+  transition:background .14s ease, color .14s ease;
+}
+.layer-order-btn:hover:not(:disabled) { background:#30384c; color:#fff; }
+.layer-order-btn:disabled { opacity:.3; cursor:not-allowed; }
 .layer-remove-btn {
   width:28px;
   height:28px;

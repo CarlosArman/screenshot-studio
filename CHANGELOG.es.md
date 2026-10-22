@@ -12,6 +12,39 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) y
 
 ---
 
+## [0.4.0] - 2026-10-22
+
+### Añadido
+
+- **Opacidad de anotaciones** — nuevo slider en el panel Propiedades para controlar la transparencia de cualquier anotación (excepto pixelado y desenfoque).
+- **Relleno de formas** — color picker de relleno y botón "Sin relleno" para rectángulos y elipses en el panel Propiedades.
+- **Mover anotaciones con teclas de flecha** — `←↑→↓` mueven 1 px la anotación seleccionada; `Shift+flecha` mueve 10 px. No interfiere con campos de texto.
+- **Duplicar anotación (`Ctrl/Cmd + D`)** — clona la anotación seleccionada con un desplazamiento de 16 px y la selecciona automáticamente.
+- **Copiar y pegar anotaciones (`Ctrl/Cmd + C` / `Ctrl/Cmd + V`)** — buffer interno independiente del portapapeles del sistema: copiar guarda la anotación seleccionada; pegar crea un clon con offset +16 px. El pegado de imágenes desde el portapapeles del sistema sigue funcionando con normalidad.
+- **Reordenar capas** — cada capa en el panel Capas incluye botones ↑ y ↓ para subir o bajar la anotación en la pila de renderizado.
+- **Zoom con rueda del ratón** — `Ctrl/Cmd + scroll` aumenta o reduce el zoom del lienzo sin tocar los botones de zoom.
+- **Pan con Espacio+drag** — manteniendo `Espacio` el cursor cambia a mano; arrastrando se desplaza el área de edición. Compatible con la herramienta activa (no crea anotaciones durante el pan).
+- **Escala de exportación** — nuevo selector en el panel de Exportación: 1× (normal), 1.5× y 2× HiDPI. El multiplicador se aplica al canvas final antes de generar el archivo.
+- **Auto-guardado en `localStorage`** — el estado del documento se serializa automáticamente tras cada cambio (debounce de 1,5 s) y se restaura al abrir la app. Las imágenes cargadas como Data URL se guardan completas; las Object URLs solo persisten dentro de la misma sesión.
+- **PWA instalable** — `manifest.webmanifest` y service worker (`sw.js`) con estrategia cache-first. La app web se puede instalar desde Chrome/Edge/Safari y funciona sin conexión.
+- **Licencia MIT** — archivo `LICENSE` añadido al repositorio.
+- **Paquetes de distribución** — carpeta `extensions/` con los archivos listos para instalar: `screenshot-studio-chrome-0.4.0.zip` (extensión Chrome/Edge) y `screenshot-studio-vscode-0.4.0.vsix` (extensión VS Code).
+
+### Corregido
+
+- **Hit-test preciso de texto** — el área de clic de una anotación de texto ahora usa `ctx.measureText` en vez de una estimación por longitud de cadena, lo que corrige la selección de texto multilínea y caracteres CJK o emoji.
+- **Dead code eliminado** — funciones `drawSelection` (annotations.js) y `darkenColor` (browser-frames.js) nunca llamadas han sido retiradas.
+- **Comportamiento de Anotaciones accesibles** — los botones del panel ahora activan la herramienta correspondiente en el toolbar (con sincronización bidireccional) en vez de crear la anotación instantáneamente; la anotación se coloca al hacer clic sobre la imagen, igual que con los botones del toolbar.
+- **Modal de compartir en modo claro** — colores del modal, botón de compartir, tarjeta, botones de plataformas y nota informativa adaptados al tema claro para garantizar contraste y legibilidad.
+
+### Cambiado
+
+- Atajos de teclado en keyboard shortcuts: `Ctrl+D` para duplicar y las flechas del teclado para mover; el `Espacio` global ahora activa el modo pan y pasa a ser consumido cuando no se edita un campo de texto.
+- `annotations.js`, `canvas-editor.js`, `browser-frames.js`, `store.js`, `export.js`, `app.js` y `light-theme.css` sincronizados en las tres superficies de producto (web, extensión Chrome/Edge, extensión VS Code).
+- Versión bumped a **0.4.0** en `browser-extension/manifest.json` y `vscode-extension/package.json`.
+
+---
+
 ## [0.3.0] - 2026-10-22
 
 ### Añadido
@@ -139,7 +172,8 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) y
 
 ---
 
-[Sin publicar]: https://github.com/CarlosArman/screenshot-studio/compare/v0.3.0...HEAD
+[Sin publicar]: https://github.com/CarlosArman/screenshot-studio/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/CarlosArman/screenshot-studio/releases/tag/v0.1.0

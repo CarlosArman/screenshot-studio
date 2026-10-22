@@ -2,7 +2,7 @@
 // Punto de entrada de Screenshot Studio. Conecta interfaz, estado, renderizado,
 // importación, anotaciones, historial y exportación sin frameworks ni backend.
 
-import { store, nextId } from './store.js';
+import { store, nextId, loadAutoSave } from './store.js';
 import { history } from './history.js';
 import { changeZoom, initCanvasEditor, resetZoom, ZOOM_STEP } from './canvas-editor.js';
 import { initAnnotations, setTool } from './annotations.js';
@@ -13,6 +13,9 @@ import { initProjectControls } from './projects.js';
 import { downloadExport, copyExport, syncExportAvailability } from './export.js';
 import { initShareControls, syncShareAvailability } from './share.js';
 import { BAR_HEIGHT } from './browser-frames.js';
+
+// Buffer interno para copiar/pegar anotaciones (no usa el portapapeles del SO)
+let annotationClipboard = null;
 
 function selectAll(selector) {
   return [...document.querySelectorAll(selector)];
@@ -257,6 +260,10 @@ function createAccessibleAnnotation(type) {
 }
 
 function initAccessibleAnnotationControls() {
+  // Los botones de Anotaciones accesibles son selectores de herramienta alternativos.
+  // Al hacer clic, activan la herramienta correspondiente en el toolbar
+  // (y viceversa, gracias a syncAccessibleAnnotationButtons).
+  // La anotación se crea al clicar sobre el canvas con la herramienta activa.
   document.querySelectorAll('[data-add-annotation]').forEach((button) => {
     button.addEventListener('click', () => {
       const toolName = ANNOTATION_TOOL_MAP[button.dataset.addAnnotation];
@@ -264,12 +271,6 @@ function initAccessibleAnnotationControls() {
         const toolButton = document.querySelector(`.tool-btn[data-tool="${toolName}"]`);
         if (toolButton) toolButton.click();
       }
-      if (!store.getState().image) {
-        document.getElementById('appStatus').value = 'Carga una imagen antes de crear una anotación.';
-        return;
-      }
-      store.addAnnotation(createAccessibleAnnotation(button.dataset.addAnnotation));
-      document.getElementById('appStatus').value = 'Anotación creada. Edita sus propiedades y posición en el panel Propiedades.';
     });
   });
 }
@@ -336,7 +337,10 @@ function renderLayers(state) {
   const list = document.getElementById('layersList');
   list.replaceChildren();
 
-  [...state.annotations].reverse().forEach((annotation) => {
+  const reversed = [...state.annotations].reverse();
+  reversed.forEach((annotation, reversedIndex) => {
+    // reversed[0] = último en la pila (arriba visualmente); +1 = subir en pila
+    const originalIndex = state.annotations.length - 1 - reversedIndex;
     const item = document.createElement('li');
     const button = document.createElement('button');
     const isSelected = annotation.id === state.selectedId;
@@ -347,6 +351,31 @@ function renderLayers(state) {
     button.textContent = annotationLabel(annotation);
     button.setAttribute('aria-pressed', String(isSelected));
     button.addEventListener('click', () => store.select(annotation.id));
+
+    // Botones de reorden
+    const upBtn = document.createElement('button');
+    upBtn.type = 'button';
+    upBtn.className = 'layer-order-btn';
+    upBtn.textContent = '↑';
+    upBtn.title = 'Subir capa';
+    upBtn.setAttribute('aria-label', 'Subir capa');
+    upBtn.disabled = originalIndex === state.annotations.length - 1;
+    upBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      store.moveAnnotation(annotation.id, 1);
+    });
+
+    const downBtn = document.createElement('button');
+    downBtn.type = 'button';
+    downBtn.className = 'layer-order-btn';
+    downBtn.textContent = '↓';
+    downBtn.title = 'Bajar capa';
+    downBtn.setAttribute('aria-label', 'Bajar capa');
+    downBtn.disabled = originalIndex === 0;
+    downBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      store.moveAnnotation(annotation.id, -1);
+    });
 
     const removeButton = document.createElement('button');
     removeButton.type = 'button';
@@ -360,7 +389,7 @@ function renderLayers(state) {
       document.getElementById('toolHint').value = 'Anotación eliminada.';
     });
 
-    item.append(button, removeButton);
+    item.append(button, upBtn, downBtn, removeButton);
     list.appendChild(item);
   });
 
@@ -429,6 +458,27 @@ function appendColorControl(panel, annotation) {
   color.value = annotation.color || '#ef4444';
   color.addEventListener('input', () => store.updateAnnotation(annotation.id, { color: color.value }));
   panel.appendChild(createControl('Color', color));
+
+  // Relleno (rect y ellipse)
+  if (annotation.type === 'rect' || annotation.type === 'ellipse') {
+    const fillWrapper = document.createElement('div');
+    fillWrapper.style.cssText = 'display:flex;align-items:center;gap:8px;';
+    const fill = document.createElement('input');
+    fill.type = 'color';
+    fill.value = annotation.fill && annotation.fill !== 'transparent' ? annotation.fill : '#000000';
+    fill.addEventListener('input', () => store.updateAnnotation(annotation.id, { fill: fill.value }));
+    const none = document.createElement('button');
+    none.type = 'button';
+    none.className = 'secondary-btn';
+    none.style.cssText = 'min-height:28px;padding:3px 8px;font-size:11px;flex:0 0 auto;';
+    none.textContent = 'Sin relleno';
+    none.addEventListener('click', () => {
+      fill.value = '#000000';
+      store.updateAnnotation(annotation.id, { fill: 'transparent' }, { commit: true });
+    });
+    fillWrapper.append(fill, none);
+    panel.appendChild(createControl('Relleno', fillWrapper));
+  }
 }
 
 function appendEmojiControls(panel, annotation) {
@@ -493,6 +543,10 @@ function renderProperties(state) {
   appendTextControls(panel, selected);
   appendNumberControl(panel, selected);
   appendPrivacyControl(panel, selected);
+  // Opacidad disponible para todos los tipos excepto efectos de privacidad
+  if (!['pixelate', 'blur'].includes(selected.type)) {
+    appendRangeControl(panel, 'Opacidad', selected, 'opacity', 0, 1, selected.opacity ?? 1);
+  }
 }
 
 function syncControlValues(state) {
@@ -534,6 +588,38 @@ function syncControlValues(state) {
   syncShareAvailability(Boolean(state.image));
 }
 
+function duplicateSelected() {
+  const selected = store.getSelected();
+  if (!selected) return;
+  const clone = structuredClone(selected);
+  clone.id = nextId();
+  // Desplaza el duplicado para hacerlo visible
+  const OFFSET = 16;
+  if ('x' in clone) clone.x += OFFSET;
+  if ('y' in clone) clone.y += OFFSET;
+  if ('x2' in clone) { clone.x2 += OFFSET; clone.y2 += OFFSET; }
+  if (clone.points) clone.points = clone.points.map((p) => ({ x: p.x + OFFSET, y: p.y + OFFSET }));
+  if (clone.bounds) clone.bounds = { ...clone.bounds, x: clone.bounds.x + OFFSET, y: clone.bounds.y + OFFSET };
+  store.addAnnotation(clone);
+  document.getElementById('toolHint').value = 'Anotación duplicada.';
+}
+
+function moveSelected(dx, dy) {
+  const selected = store.getSelected();
+  if (!selected) return;
+  history.beginGesture();
+  const patch = {};
+  if ('x' in selected) patch.x = selected.x + dx;
+  if ('y' in selected) patch.y = selected.y + dy;
+  if ('x2' in selected) { patch.x2 = selected.x2 + dx; patch.y2 = selected.y2 + dy; }
+  if (selected.points) {
+    patch.points = selected.points.map((p) => ({ x: p.x + dx, y: p.y + dy }));
+    if (selected.bounds) patch.bounds = { ...selected.bounds, x: selected.bounds.x + dx, y: selected.bounds.y + dy };
+  }
+  store.updateAnnotation(selected.id, patch);
+  history.commitGesture();
+}
+
 function initKeyboardShortcuts() {
   window.addEventListener('keydown', (event) => {
     const activeTag = document.activeElement?.tagName;
@@ -549,6 +635,39 @@ function initKeyboardShortcuts() {
       history.redo();
       return;
     }
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'c') {
+      if (!editing && store.getState().selectedId) {
+        const selected = store.getSelected();
+        if (selected) {
+          annotationClipboard = structuredClone(selected);
+          document.getElementById('toolHint').value = 'Anotación copiada. Usa Ctrl+V para pegarla.';
+        }
+      }
+      return;
+    }
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'v') {
+      if (!editing && annotationClipboard) {
+        const clone = structuredClone(annotationClipboard);
+        clone.id = nextId();
+        const OFFSET = 16;
+        if ('x' in clone) clone.x += OFFSET;
+        if ('y' in clone) clone.y += OFFSET;
+        if ('x2' in clone) { clone.x2 += OFFSET; clone.y2 += OFFSET; }
+        if (clone.points) clone.points = clone.points.map((p) => ({ x: p.x + OFFSET, y: p.y + OFFSET }));
+        if (clone.bounds) clone.bounds = { ...clone.bounds, x: clone.bounds.x + OFFSET, y: clone.bounds.y + OFFSET };
+        store.addAnnotation(clone);
+        document.getElementById('toolHint').value = 'Anotación pegada.';
+        // No consumir el evento para que image-import.js siga recibiendo paste de imágenes
+      }
+      return;
+    }
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'd') {
+      if (!editing) {
+        event.preventDefault();
+        duplicateSelected();
+      }
+      return;
+    }
     if (event.ctrlKey || event.metaKey) return;
     if (!editing && event.key === 'Escape') {
       event.preventDefault();
@@ -561,6 +680,17 @@ function initKeyboardShortcuts() {
     if (!editing && (event.key === 'Delete' || event.key === 'Backspace')) {
       event.preventDefault();
       store.removeSelected();
+      return;
+    }
+    // Mover anotación con teclas de flecha (1 px; 10 px con Shift)
+    if (!editing && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      if (store.getState().selectedId) {
+        event.preventDefault();
+        const step = event.shiftKey ? 10 : 1;
+        const dx = event.key === 'ArrowLeft' ? -step : event.key === 'ArrowRight' ? step : 0;
+        const dy = event.key === 'ArrowUp' ? -step : event.key === 'ArrowDown' ? step : 0;
+        moveSelected(dx, dy);
+      }
       return;
     }
     if (editing) return;
@@ -639,6 +769,22 @@ function boot() {
   renderProperties(initialState);
   syncControlValues(initialState);
   updateToolHint('select');
+
+  // Restaurar sesión auto-guardada al iniciar
+  const saved = loadAutoSave();
+  if (saved) {
+    const hasContent = saved.annotations?.length > 0
+      || saved.frame?.type !== 'macos'
+      || saved.background?.type !== 'gradient'
+      || saved.image;
+    if (hasContent) {
+      store.update({ ...saved, selectedId: null }, { silent: true });
+      const msg = saved.image
+        ? 'Sesión anterior restaurada. Continúa donde lo dejaste.'
+        : 'Configuración de sesión anterior restaurada. Vuelve a importar la imagen para continuar.';
+      document.getElementById('toolHint').value = msg;
+    }
+  }
 }
 
 boot();

@@ -7,6 +7,7 @@
 <meta name="description" content="Editor local para capturar, anotar y exportar imágenes sin subirlas a ningún servidor." />
 <meta name="theme-color" content="#090b12" />
 <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+<link rel="manifest" href="./manifest.webmanifest" />
 <link rel="stylesheet" href="./styles/main.css" />
 <link rel="stylesheet" href="./styles/light-theme.css" />
 </head>
@@ -214,7 +215,7 @@
       <aside class="panel panel-right" id="panelRight" aria-label="Propiedades y exportación">
         <section class="panel-section" aria-labelledby="accessibleAnnotationsHeading">
           <h3 id="accessibleAnnotationsHeading">Anotaciones accesibles</h3>
-          <p class="panel-help">Crea una anotación sin usar el lienzo y edítala desde Propiedades.</p>
+          <p class="panel-help">Selecciona el tipo de anotación y luego haz clic sobre la imagen para colocarla. Se sincroniza con la barra de herramientas.</p>
           <fieldset class="annotation-actions">
             <legend class="sr-only">Crear anotación</legend>
             <button class="secondary-btn" type="button" data-add-annotation="text">Agregar texto</button>
@@ -240,6 +241,7 @@
         <section class="panel-section export-card" aria-labelledby="exportSectionHeading">
           <h3 id="exportSectionHeading">Exportar</h3>
           <label class="field-row" for="exportFormat"><span>Formato</span><select id="exportFormat" aria-label="Formato de exportación"><option value="png">PNG</option><option value="jpeg">JPEG</option><option value="webp">WebP</option></select></label>
+          <label class="field-row" for="exportScale"><span>Escala</span><select id="exportScale" aria-label="Escala de exportación"><option value="1">1× normal</option><option value="1.5">1.5×</option><option value="2">2× HiDPI</option></select></label>
           <label class="field-row" for="exportQuality"><span>Calidad</span><input type="range" id="exportQuality" min="10" max="100" value="92" aria-describedby="exportQualityValue" /><output id="exportQualityValue" class="range-value">92%</output></label>
           <div class="button-row">
             <button id="downloadBtn" class="secondary-btn" type="button">Descargar</button>
@@ -317,5 +319,10 @@
   </div>
 
   <script type="module" src="./js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  </script>
 </body>
 </html>

@@ -12,6 +12,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [0.4.0] - 2026-10-22
+
+### Added
+
+- **Annotation opacity** — new slider in the Properties panel to control the transparency of any annotation (except pixelate and blur).
+- **Shape fill** — fill color picker and "No fill" button for rectangles and ellipses in the Properties panel.
+- **Move annotations with arrow keys** — `←↑→↓` move the selected annotation 1 px; `Shift+arrow` moves 10 px. Does not interfere with text fields.
+- **Duplicate annotation (`Ctrl/Cmd + D`)** — clones the selected annotation with a 16 px offset and selects it automatically.
+- **Copy and paste annotations (`Ctrl/Cmd + C` / `Ctrl/Cmd + V`)** — internal buffer independent of the system clipboard: copy saves the selected annotation; paste creates a clone with a +16 px offset. System clipboard image paste continues to work normally.
+- **Reorder layers** — each layer in the Layers panel includes ↑ and ↓ buttons to move the annotation up or down in the rendering stack.
+- **Mouse wheel zoom** — `Ctrl/Cmd + scroll` zooms the canvas in or out without touching the zoom buttons.
+- **Space+drag pan** — holding `Space` changes the cursor to a hand; dragging scrolls the editing area. Compatible with the active tool (no annotations are created during pan).
+- **Export scale** — new selector in the Export panel: 1× (normal), 1.5×, and 2× HiDPI. The multiplier is applied to the final canvas before generating the file.
+- **Auto-save to `localStorage`** — document state is serialized automatically after each change (1.5 s debounce) and restored on app open. Images loaded as Data URLs are saved fully; Object URLs only persist within the same session.
+- **Installable PWA** — `manifest.webmanifest` and service worker (`sw.js`) with a cache-first strategy. The web app can be installed from Chrome/Edge/Safari and works offline.
+- **MIT License** — `LICENSE` file added to the repository.
+- **Distribution packages** — `extensions/` folder containing ready-to-install files: `screenshot-studio-chrome-0.4.0.zip` (Chrome/Edge extension) and `screenshot-studio-vscode-0.4.0.vsix` (VS Code extension).
+
+### Fixed
+
+- **Precise text hit-test** — click area for text annotations now uses `ctx.measureText` instead of a string-length estimate, fixing selection of multi-line text and CJK/emoji characters.
+- **Dead code removed** — unused `drawSelection` (annotations.js) and `darkenColor` (browser-frames.js) functions have been deleted.
+- **Accessible Annotations behavior** — panel buttons now activate the corresponding toolbar tool (with bidirectional sync) instead of instantly creating the annotation; the annotation is placed by clicking on the image, just like the toolbar buttons.
+- **Share modal in light mode** — modal card, share button, platform buttons, and info note now adapt to the light theme with proper contrast and readability.
+
+### Changed
+
+- Keyboard shortcuts: `Ctrl+D` for duplicate and arrow keys for moving; `Space` now activates pan mode and is consumed when not editing a text field.
+- `annotations.js`, `canvas-editor.js`, `browser-frames.js`, `store.js`, `export.js`, `app.js` and `light-theme.css` synchronized across all three product surfaces (web, Chrome/Edge extension, VS Code extension).
+- Version bumped to **0.4.0** in `browser-extension/manifest.json` and `vscode-extension/package.json`.
+
+---
+
 ## [0.3.0] - 2026-10-22
 
 ### Added
@@ -137,7 +170,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
-[Unreleased]: https://github.com/CarlosArman/screenshot-studio/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/CarlosArman/screenshot-studio/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/CarlosArman/screenshot-studio/releases/tag/v0.1.0

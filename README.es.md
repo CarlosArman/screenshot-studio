@@ -1,7 +1,7 @@
 # 📸 Screenshot Studio
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Versi%C3%B3n-0.3.0-blueviolet" alt="Versión" />
+  <img src="https://img.shields.io/badge/Versi%C3%B3n-0.4.0-blueviolet" alt="Versión" />
   <img src="https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white" alt="HTML5" />
   <img src="https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white" alt="CSS3" />
   <img src="https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black" alt="JavaScript" />
@@ -191,8 +191,13 @@ Cada push a `main` despliega automáticamente el contenido de [`web/`](./web/) m
 | `B` | Desenfocar información sensible |
 | `Ctrl/Cmd + Z` | Deshacer |
 | `Ctrl/Cmd + Shift + Z` o `Ctrl/Cmd + Y` | Rehacer |
+| `Ctrl/Cmd + D` | Duplicar anotación seleccionada |
+| `←` `↑` `→` `↓` | Mover anotación 1 px |
+| `Shift + ←↑→↓` | Mover anotación 10 px |
 | `Supr` / `Backspace` | Eliminar anotación seleccionada |
 | `Esc` | Cancelar selección o gesto activo |
+| `Espacio + arrastrar` | Desplazar el área de edición (pan) |
+| `Ctrl/Cmd + scroll` | Zoom con la rueda del ratón |
 
 ---
 
@@ -292,10 +297,22 @@ Próximas mejoras planificadas:
 - [x] Guardar/cargar proyectos locales.
 - [x] Modal de compartir con Web Share API y accesos a plataformas sociales.
 - [x] Anotaciones Accesibles con los 10 tipos de herramienta y sincronización bidireccional con el toolbar.
+- [x] Opacidad y relleno de formas en el panel Propiedades.
+- [x] Mover anotaciones con teclas de flecha y duplicar con Ctrl+D.
+- [x] Copiar y pegar anotaciones (Ctrl+C / Ctrl+V, buffer interno).
+- [x] Reordenar capas con botones en el panel Capas.
+- [x] Zoom con rueda del ratón y pan con Espacio+drag.
+- [x] Exportación a escala 2× HiDPI.
+- [x] Auto-guardado en localStorage con restauración al inicio.
+- [x] PWA instalable (manifest + service worker, funciona offline).
+- [x] Licencia MIT.
+- [x] Comportamiento correcto de Anotaciones accesibles (selector de herramienta con sincronización bidireccional).
+- [x] Modal de compartir adaptado al tema claro.
+- [x] Paquetes de distribución generados en `extensions/` (ZIP Chrome/Edge y VSIX VS Code).
 - [ ] Pruebas automatizadas de canvas, accesibilidad y responsive.
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto se distribuye con fines de desarrollo y demostración. Añade una licencia explícita antes de publicar una versión distribuible.
+Este proyecto se distribuye bajo la licencia **MIT**. Consulta el archivo [`LICENSE`](./LICENSE) para más detalles.
