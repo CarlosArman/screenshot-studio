@@ -7,7 +7,6 @@
 <meta name="description" content="Editor local para capturar, anotar y exportar imágenes sin subirlas a ningún servidor." />
 <meta name="theme-color" content="#090b12" />
 <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-<link rel="manifest" href="./manifest.webmanifest" />
 <link rel="stylesheet" href="./styles/main.css" />
 <link rel="stylesheet" href="./styles/light-theme.css" />
 </head>
@@ -258,7 +257,7 @@
   </div>
 
   <!-- Modal compartir en redes sociales -->
-  <div id="shareModal" class="share-modal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle" aria-hidden="true">
+  <dialog id="shareModal" class="share-modal" aria-labelledby="shareModalTitle">
     <div class="share-modal-card" tabindex="-1">
       <div class="share-modal-header">
         <h2 id="shareModalTitle" class="share-modal-title">
@@ -316,13 +315,8 @@
         La imagen se descargar&#xE1; autom&#xE1;ticamente para que puedas adjuntarla en la red social.
       </p>
     </div>
-  </div>
+  </dialog>
 
   <script type="module" src="./js/app.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(() => {});
-    }
-  </script>
 </body>
 </html>

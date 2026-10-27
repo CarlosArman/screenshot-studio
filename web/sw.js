@@ -1,7 +1,7 @@
 // sw.js — Service Worker de Screenshot Studio
 // Estrategia: cache-first para recursos de la app; network-first para navegación.
 
-const CACHE = 'screenshot-studio-v0.4.0';
+const CACHE = 'screenshot-studio-v0.4.1';
 
 const PRECACHE = [
   './',
@@ -47,15 +47,15 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
-  event.respondWith(
-    caches.match(event.request).then((cached) =>
-      cached ?? fetch(event.request).then((response) => {
-        if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(event.request, clone));
-        }
-        return response;
-      })
-    )
-  );
+  event.respondWith((async () => {
+    const cached = await caches.match(event.request);
+    if (cached) return cached;
+
+    const response = await fetch(event.request);
+    if (response.ok) {
+      const cache = await caches.open(CACHE);
+      await cache.put(event.request, response.clone());
+    }
+    return response;
+  })());
 });

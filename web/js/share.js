@@ -58,7 +58,7 @@ export async function shareNative() {
   const file = new File([blob], 'screenshot-studio.png', { type: 'image/png' });
 
   try {
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    if (navigator.canShare?.({ files: [file] })) {
       await navigator.share({
         files: [file],
         title: 'Screenshot Studio',
@@ -70,7 +70,7 @@ export async function shareNative() {
     reportStatus('Imagen compartida correctamente.', 'success');
     return true;
   } catch (error) {
-    if (error.name !== 'AbortError') {
+    if (error?.name !== 'AbortError') {
       reportStatus('No se pudo compartir la imagen.', 'error');
     }
     return false;
@@ -100,19 +100,12 @@ function shareTo(platform) {
 
 function closeShareModal() {
   const modal = document.getElementById('shareModal');
-  if (!modal) return;
-  modal.classList.remove('share-modal-visible');
-  modal.setAttribute('aria-hidden', 'true');
-  // Devuelve foco al botón que abrió el modal
-  document.getElementById('shareBtn')?.focus();
+  if (modal?.open) modal.close();
 }
 
 function openShareModal() {
   const modal = document.getElementById('shareModal');
-  if (!modal) return;
-  modal.classList.add('share-modal-visible');
-  modal.setAttribute('aria-hidden', 'false');
-  modal.querySelector('.share-modal-card')?.focus();
+  if (modal && !modal.open) modal.showModal();
 }
 
 export function initShareControls() {
@@ -135,11 +128,8 @@ export function initShareControls() {
     if (event.target === modal) closeShareModal();
   });
 
-  // Cerrar con Escape
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && modal.classList.contains('share-modal-visible')) {
-      closeShareModal();
-    }
+  modal.addEventListener('close', () => {
+    document.getElementById('shareBtn')?.focus();
   });
 
   // Botón de cerrar

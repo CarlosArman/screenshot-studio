@@ -12,6 +12,23 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) y
 
 ---
 
+## [0.4.1] - 2026-10-27
+
+### Corregido
+
+- **Diálogo nativo accesible para compartir** — se sustituyó el diálogo ARIA personalizado por el elemento nativo `<dialog>`, usando su comportamiento modal, cierre con Escape, gestión del foco y evento de cierre.
+- **Accesibilidad de los controles de compartir** — se mejoró el contraste de las acciones de compartir, botones de plataformas, textos del modal y tema claro.
+- **Movimiento reducido** — se eliminó el movimiento de los botones y tooltips de herramientas, conservando el feedback sin desplazamientos.
+- **Detección de Web Share** — se usa optional chaining para `navigator.canShare` al comprobar soporte para compartir archivos.
+
+### Cambiado
+
+- Marcado del modal, lógica de compartir y estilos de accesibilidad sincronizados en la aplicación web, extensión Chrome/Edge y extensión VS Code.
+- Versión actualizada a **0.4.1** en `browser-extension/manifest.json` y `vscode-extension/package.json`.
+- Paquetes de distribución generados: `extensions/screenshot-studio-chrome-0.4.1.zip` y `extensions/screenshot-studio-vscode-0.4.1.vsix`.
+
+---
+
 ## [0.4.0] - 2026-10-22
 
 ### Añadido
@@ -172,7 +189,8 @@ El formato se basa en [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) y
 
 ---
 
-[Sin publicar]: https://github.com/CarlosArman/screenshot-studio/compare/v0.4.0...HEAD
+[Sin publicar]: https://github.com/CarlosArman/screenshot-studio/compare/v0.4.1...HEAD
+[0.4.1]: https://github.com/CarlosArman/screenshot-studio/compare/v0.4.0...v0.4.1
 [0.4.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/CarlosArman/screenshot-studio/compare/v0.1.0...v0.2.0
